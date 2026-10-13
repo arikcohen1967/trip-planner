@@ -31,15 +31,11 @@ interface AppVersion {
 }
 
 function App() {
-  // ניווט בין מסכים
   const [currentStep, setCurrentStep] = useState<'setup' | 'itinerary'>('setup')
-
-  // נתוני טיול
   const [destination, setDestination] = useState<string>('')
   const [startDate, setStartDate] = useState<string>('')
   const [endDate, setEndDate] = useState<string>('')
 
-  // מסלולים
   const [itinerary, setItinerary] = useState<DayItinerary[]>([
     {
       dayNumber: 1,
@@ -51,7 +47,6 @@ function App() {
   ])
   const [selectedDay, setSelectedDay] = useState<number>(1)
 
-  // תפריט צדדי לניהול גרסאות
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
   const [adminPasswordInput, setAdminPasswordInput] = useState<string>('')
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false)
@@ -145,8 +140,6 @@ function App() {
 
   return (
     <div style={{ position: 'relative', minHeight: '100vh' }}>
-      
-      {/* כפתור לפתיחת תפריט צדדי מימין */}
       <button 
         onClick={() => setIsSidebarOpen(true)}
         style={{
@@ -167,7 +160,6 @@ function App() {
         ⚙️ ניהול וגרסאות
       </button>
 
-      {/* תפריט צדדי (Sidebar) מימין */}
       {isSidebarOpen && (
         <div style={{
           position: 'fixed',
@@ -249,7 +241,6 @@ function App() {
         </div>
       )}
 
-      {/* תוכן ראשי */}
       <div className="hero">
         <img src={heroImg} className="base" width="100" height="105" alt="" />
         <img src={reactLogo} width="35" alt="" />
@@ -261,7 +252,6 @@ function App() {
         <p>מערכת ניהול טיולים חכמה ומקצועית</p>
       </div>
 
-      {/* שלב 1: עמוד ראשון - קביעת יעד ותאריכים */}
       {currentStep === 'setup' ? (
         <div className="trip-card">
           <h3>שלב 1: הגדרת יעד הטיול והמסגרת</h3>
@@ -289,7 +279,6 @@ function App() {
           </form>
         </div>
       ) : (
-        /* שלב 2: עמוד המסלולים והאטרקציות */
         <div className="trip-card">
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '0.75rem' }}>
             <h3 style={{ margin: 0 }}>מסלול טיול: {destination}</h3>
@@ -301,7 +290,6 @@ function App() {
             </button>
           </div>
 
-          {/* בחירת יום */}
           <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
             {itinerary.map(day => (
               <button
@@ -322,7 +310,6 @@ function App() {
             ))}
           </div>
 
-          {/* אטרקציות וניווט */}
           {itinerary.filter(d => d.dayNumber === selectedDay).map(day => (
             <div key={day.dayNumber}>
               <h4 style={{ color: '#4f46e5', marginBottom: '1rem' }}>{day.title}</h4>
@@ -334,4 +321,16 @@ function App() {
                   </div>
                   <div style={{ display: 'flex', gap: '0.5rem' }}>
                     <button onClick={() => openWaze(attr.location)} style={{ padding: '0.4rem 0.75rem', background: '#33ccff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.8rem' }}>Waze</button>
-                    <button onClick={() => openGoogleMaps(attr.location)} style={{ padding: '0.4rem 0.75rem',
+                    <button onClick={() => openGoogleMaps(attr.location)} style={{ padding: '0.4rem 0.75rem', background: '#34a853', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.8rem' }}>Maps</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))}
+        </div>
+      )}
+    </div>
+  )
+}
+
+export default App
