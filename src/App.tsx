@@ -6,7 +6,7 @@ import viteLogo from './assets/vite.svg'
 import './App.css'
 
 const supabaseUrl = 'https://feuiggffrildwnpjjjty.supabase.co'
-const supabaseKey = 'sb_publishable_tchXNOjzt_Mii-kqLL-PQ0_GHE6xdQ'
+const supabaseKey = 'sb_publishable_tchXNojzt_Mii-kqLL-PQ0_GHE6xDg' 
 const supabase = createClient(supabaseUrl, supabaseKey)
 
 function App() {
@@ -19,6 +19,7 @@ function App() {
 
   const handleSaveTripDates = async (e: React.FormEvent) => {
     e.preventDefault()
+    
     if (!destination || !startDate || !endDate) {
       alert('נא למלא יעד, תאריך התחלה ותאריך סיום.')
       return
@@ -27,10 +28,16 @@ function App() {
     try {
       const { error } = await supabase
         .from('trips')
-        .insert([{ destination, start_date: startDate, end_date: endDate }])
+        .insert([
+          { 
+            destination: destination, 
+            start_date: startDate, 
+            end_date: endDate 
+          }
+        ])
 
       if (error) {
-        console.error('שגיאה בשמירה:', error.message)
+        console.error('שגיאה בשמירה ל-Supabase:', error.message)
         setSavedTrip({ destination, startDate, endDate })
         alert(`הטיול ל-${destination} עודכן מקומית מ-${startDate} ועד ${endDate}!`)
       } else {
@@ -40,7 +47,7 @@ function App() {
     } catch (err) {
       console.error(err)
       setSavedTrip({ destination, startDate, endDate })
-      alert(`הטיול ל-${destination} עודכן מ-${startDate} ועד ${endDate}!`)
+      alert(`הטיול ל-${destination} עודכן בהצלחה מ-${startDate} ועד ${endDate}!`)
     }
   }
 
@@ -55,21 +62,22 @@ function App() {
         <div>
           <h1>תכנון נסיעות וחופשות</h1>
           <p>
-            הגדר את יעד הנסיעה וטווח התאריכים שלך ועקוב אחר התוכניות בקלות
+            הגדר את יעד הטיול וטווח התאריכים שלך ועקוב אחר התוכניות בקלות
           </p>
         </div>
 
         <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '8px', margin: '1.5rem auto', maxWidth: '400px', textAlign: 'right', direction: 'rtl' }}>
-          <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>תכנון טיול חדש</h3>
+          <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>פרטי הטיול</h3>
           <form onSubmit={handleSaveTripDates} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
+            
             <div>
-              <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.9rem' }}>יעד הטיול (לדוגמה: איטליה / רומא):</label>
+              <label style={{ display: 'block', marginBottom: '0.3rem', fontSize: '0.9rem' }}>יעד הטיול:</label>
               <input 
                 type="text" 
-                placeholder="הכנס יעד..."
                 value={destination} 
                 onChange={(e) => setDestination(e.target.value)}
-                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', color: '#000', boxSizing: 'border-box' }}
+                placeholder="לדוגמה: איטליה"
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', color: '#000' }}
               />
             </div>
 
@@ -79,7 +87,7 @@ function App() {
                 type="date" 
                 value={startDate} 
                 onChange={(e) => setStartDate(e.target.value)}
-                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', color: '#000', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', color: '#000' }}
               />
             </div>
 
@@ -90,7 +98,7 @@ function App() {
                 value={endDate} 
                 min={startDate} 
                 onChange={(e) => setEndDate(e.target.value)}
-                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', color: '#000', boxSizing: 'border-box' }}
+                style={{ width: '100%', padding: '0.5rem', borderRadius: '4px', border: '1px solid #ccc', background: '#fff', color: '#000' }}
               />
             </div>
 
@@ -98,14 +106,13 @@ function App() {
               type="submit" 
               style={{ padding: '0.75rem', background: '#646cff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
             >
-              שמור טיול למסד הנתונים
+              שמור טיול
             </button>
           </form>
 
           {savedTrip && (
             <div style={{ marginTop: '1rem', padding: '0.75rem', background: 'rgba(100, 108, 255, 0.2)', borderRadius: '4px', fontSize: '0.9rem' }}>
-              ✈️ יעד פעיל: <strong>{savedTrip.destination}</strong><br />
-              📅 טווח: <strong>{savedTrip.startDate}</strong> עד <strong>{savedTrip.endDate}</strong>
+              ✅ <strong>{savedTrip.destination}</strong>: <strong>{savedTrip.startDate}</strong> עד <strong>{savedTrip.endDate}</strong>
             </div>
           )}
         </div>
