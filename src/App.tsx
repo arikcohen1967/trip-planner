@@ -139,7 +139,8 @@ function App() {
   }
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh' }}>
+    <div style={{ position: 'relative', minHeight: '100vh', direction: 'rtl' }}>
+      {/* כפתור תפריט צדדי מימין */}
       <button 
         onClick={() => setIsSidebarOpen(true)}
         style={{
@@ -149,17 +150,18 @@ function App() {
           background: '#0f172a',
           color: '#fff',
           border: 'none',
-          padding: '0.5rem 1rem',
-          borderRadius: '8px',
+          padding: '0.6rem 1.2rem',
+          borderRadius: '10px',
           cursor: 'pointer',
           fontWeight: 'bold',
           zIndex: 100,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.1)'
+          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
         }}
       >
         ⚙️ ניהול וגרסאות
       </button>
 
+      {/* תפריט צדדי נפתח מימין */}
       {isSidebarOpen && (
         <div style={{
           position: 'fixed',
@@ -168,12 +170,11 @@ function App() {
           width: '320px',
           height: '100vh',
           background: '#ffffff',
-          boxShadow: '-5px 0 25px rgba(0,0,0,0.1)',
+          boxShadow: '-5px 0 25px rgba(0,0,0,0.15)',
           zIndex: 1000,
           padding: '2rem 1.5rem',
           boxSizing: 'border-box',
           overflowY: 'auto',
-          direction: 'rtl',
           textAlign: 'right'
         }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
@@ -188,16 +189,17 @@ function App() {
 
           {!isAdminAuthenticated ? (
             <form onSubmit={handleAdminLogin}>
-              <div className="form-group">
-                <label>סיסמת מנהל על</label>
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>סיסמת מנהל על</label>
                 <input 
                   type="password" 
                   value={adminPasswordInput} 
                   onChange={e => setAdminPasswordInput(e.target.value)}
                   placeholder="הכנס סיסמה..."
+                  style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
                 />
               </div>
-              <button type="submit" className="submit-btn" style={{ background: '#0f172a' }}>התחבר</button>
+              <button type="submit" className="submit-btn" style={{ background: '#0f172a', width: '100%', padding: '0.6rem', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>התחבר</button>
             </form>
           ) : (
             <div>
@@ -208,8 +210,7 @@ function App() {
               <button 
                 type="button" 
                 onClick={handleSaveNewVersion} 
-                className="submit-btn"
-                style={{ background: '#10b981', marginBottom: '1.5rem' }}
+                style={{ background: '#10b981', color: '#fff', width: '100%', padding: '0.6rem', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '1.5rem' }}
               >
                 💾 צור גרסה חדשה (Commit)
               </button>
@@ -231,7 +232,7 @@ function App() {
                 <button 
                   type="button" 
                   onClick={handleRestoreVersion}
-                  style={{ width: '100%', padding: '0.5rem', background: '#f59e0b', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+                  style={{ width: '100%', padding: '0.6rem', background: '#f59e0b', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
                 >
                   שחזר גרסה נבחרת
                 </button>
@@ -241,94 +242,104 @@ function App() {
         </div>
       )}
 
-      <div className="hero">
+      {/* לוגו וכותרת */}
+      <div className="hero" style={{ textAlign: 'center', padding: '2rem 0' }}>
         <img src={heroImg} className="base" width="100" height="105" alt="" />
-        <img src={reactLogo} width="35" alt="" />
-        <img src={viteLogo} width="35" alt="" />
-      </div>
-
-      <div>
-        <h1>תכנון נסיעות וחופשות</h1>
-        <p>מערכת ניהול טיולים חכמה ומקצועית</p>
-      </div>
-
-      {currentStep === 'setup' ? (
-        <div className="trip-card">
-          <h3>שלב 1: הגדרת יעד הטיול והמסגרת</h3>
-          <form onSubmit={handleSaveSetup}>
-            <div className="form-group">
-              <label>יעד הטיול</label>
-              <input 
-                type="text" 
-                value={destination} 
-                onChange={e => setDestination(e.target.value)}
-                placeholder="לדוגמה: איטליה - צפון אגם גארדה"
-              />
-            </div>
-            <div className="form-group">
-              <label>תאריך התחלה</label>
-              <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} />
-            </div>
-            <div className="form-group">
-              <label>תאריך סיום</label>
-              <input type="date" value={endDate} min={startDate} onChange={e => setEndDate(e.target.value)} />
-            </div>
-            <button type="submit" className="submit-btn">
-              המשך לתכנון המסלולים ⬅️
-            </button>
-          </form>
+        <div style={{ display: 'inline-flex', gap: '0.5rem', marginTop: '0.5rem' }}>
+          <img src={reactLogo} width="30" alt="" />
+          <img src={viteLogo} width="30" alt="" />
         </div>
-      ) : (
-        <div className="trip-card">
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '0.75rem' }}>
-            <h3 style={{ margin: 0 }}>מסלול טיול: {destination}</h3>
-            <button 
-              onClick={() => setCurrentStep('setup')}
-              style={{ background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer', fontWeight: 'bold' }}
-            >
-              ✏️ ערוך פרטי טיול
-            </button>
-          </div>
+      </div>
 
-          <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-            {itinerary.map(day => (
-              <button
-                key={day.dayNumber}
-                type="button"
-                onClick={() => setSelectedDay(day.dayNumber)}
-                style={{
-                  padding: '0.5rem 1rem',
-                  borderRadius: '8px',
-                  border: selectedDay === day.dayNumber ? '2px solid #6366f1' : '1px solid #cbd5e1',
-                  background: selectedDay === day.dayNumber ? '#e0e7ff' : '#fff',
-                  cursor: 'pointer',
-                  fontWeight: 'bold'
-                }}
-              >
-                יום {day.dayNumber}
+      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
+        <h1 style={{ fontSize: '1.8rem', color: '#0f172a', margin: '0 0 0.5rem 0' }}>תכנון נסיעות וחופשות</h1>
+        <p style={{ color: '#64748b', margin: 0 }}>ניהול מסלולים חכם, נקודות ציון וסנכרון מלא</p>
+      </div>
+
+      {/* תוכן ראשי לפי שלבים */}
+      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '0 1rem' }}>
+        {currentStep === 'setup' ? (
+          <div className="trip-card" style={{ background: '#fff', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+            <h3 style={{ marginTop: 0, color: '#1e293b', marginBottom: '1.2rem' }}>שלב 1: הגדרת יעד הטיול והמסגרת</h3>
+            <form onSubmit={handleSaveSetup}>
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>יעד הטיול</label>
+                <input 
+                  type="text" 
+                  value={destination} 
+                  onChange={e => setDestination(e.target.value)}
+                  placeholder="לדוגמה: איטליה - צפון אגם גארדה"
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
+                />
+              </div>
+              <div className="form-group" style={{ marginBottom: '1rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>תאריך התחלה</label>
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }} />
+              </div>
+              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
+                <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>תאריך סיום</label>
+                <input type="date" value={endDate} min={startDate} onChange={e => setEndDate(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }} />
+              </div>
+              <button type="submit" style={{ width: '100%', padding: '0.8rem', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer' }}>
+                המשך לתכנון המסלולים ⬅️
               </button>
-            ))}
+            </form>
           </div>
+        ) : (
+          <div className="trip-card" style={{ background: '#fff', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, color: '#1e293b' }}>יעד: {destination}</h3>
+              <button 
+                onClick={() => setCurrentStep('setup')}
+                style={{ background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer', fontWeight: 'bold' }}
+              >
+                ✏️ ערוך פרטים
+              </button>
+            </div>
 
-          {itinerary.filter(d => d.dayNumber === selectedDay).map(day => (
-            <div key={day.dayNumber}>
-              <h4 style={{ color: '#4f46e5', marginBottom: '1rem' }}>{day.title}</h4>
-              {day.attractions.map(attr => (
-                <div key={attr.id} style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                  <div>
-                    <div style={{ fontWeight: '700' }}>{attr.name}</div>
-                    <div style={{ fontSize: '0.85rem', color: '#64748b' }}>📍 {attr.location}</div>
-                  </div>
-                  <div style={{ display: 'flex', gap: '0.5rem' }}>
-                    <button onClick={() => openWaze(attr.location)} style={{ padding: '0.4rem 0.75rem', background: '#33ccff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.8rem' }}>Waze</button>
-                    <button onClick={() => openGoogleMaps(attr.location)} style={{ padding: '0.4rem 0.75rem', background: '#34a853', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.8rem' }}>Maps</button>
-                  </div>
-                </div>
+            {/* בחירת יום */}
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
+              {itinerary.map(day => (
+                <button
+                  key={day.dayNumber}
+                  type="button"
+                  onClick={() => setSelectedDay(day.dayNumber)}
+                  style={{
+                    padding: '0.5rem 1rem',
+                    borderRadius: '8px',
+                    border: selectedDay === day.dayNumber ? '2px solid #6366f1' : '1px solid #cbd5e1',
+                    background: selectedDay === day.dayNumber ? '#e0e7ff' : '#fff',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    whiteSpace: 'nowrap'
+                  }}
+                >
+                  יום {day.dayNumber}
+                </button>
               ))}
             </div>
-          ))}
-        </div>
-      )}
+
+            {/* אטרקציות וניווט */}
+            {itinerary.filter(d => d.dayNumber === selectedDay).map(day => (
+              <div key={day.dayNumber}>
+                <h4 style={{ color: '#4f46e5', marginBottom: '1rem' }}>{day.title}</h4>
+                {day.attractions.map(attr => (
+                  <div key={attr.id} style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
+                    <div>
+                      <div style={{ fontWeight: '700', color: '#1e293b' }}>{attr.name}</div>
+                      <div style={{ fontSize: '0.85rem', color: '#64748b' }}>📍 {attr.location}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.4rem' }}>
+                      <button onClick={() => openWaze(attr.location)} style={{ padding: '0.4rem 0.6rem', background: '#33ccff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.75rem' }}>Waze</button>
+                      <button onClick={() => openGoogleMaps(attr.location)} style={{ padding: '0.4rem 0.6rem', background: '#34a853', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.75rem' }}>Maps</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   )
 }
