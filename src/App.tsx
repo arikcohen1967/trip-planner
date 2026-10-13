@@ -2,24 +2,43 @@ import { useState } from 'react'
 import heroImg from './assets/hero.png'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
+import { supabase } from './supabaseClient'
 import './App.css'
 
 function App() {
   const [count, setCount] = useState<number>(0)
   
-  // States עבור טווח תאריכי הנסיעה
   const [startDate, setStartDate] = useState<string>('')
   const [endDate, setEndDate] = useState<string>('')
   const [savedTrip, setSavedTrip] = useState<{ startDate: string; endDate: string } | null>(null)
 
-  const handleSaveTripDates = (e: React.FormEvent) => {
+  const handleSaveTripDates = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!startDate || !endDate) {
       alert('נא לבחור גם תאריך התחלה וגם תאריך סיום.')
       return
     }
-    setSavedTrip({ startDate, endDate })
-    alert(`הטיול עודכן בהצלחה מ-${startDate} ועד ${endDate}!`)
+
+    // שמירה ל-Supabase
+    try {
+      const { error } = await supabase
+        .from('trips')
+        .insert([{ start_date: startDate, end_date: endDate }])
+
+      if (error) {
+        console.error('שגיאה בשמירה:', error.message)
+        // שומרים גם מקומית במקרה והטבלה עדיין לא נוצרה ב-Supabase
+        setSavedTrip({ startDate, endDate })
+        alert(`הטיול עודכן מקומית מ-${startDate} ועד ${endDate}!`)
+      } else {
+        setSavedTrip({ startDate, endDate })
+        alert(`הטיול נשמר בהצלחה במסד הנתונים מ-${startDate} ועד ${endDate}!`)
+      }
+    } catch (err) {
+      console.error(err)
+      setSavedTrip({ startDate, endDate })
+      alert(`הטיול עודכן מ-${startDate} ועד ${endDate}!`)
+    }
   }
 
   return (
@@ -37,7 +56,6 @@ function App() {
           </p>
         </div>
 
-        {/* טופס בחירת טווח תאריכים */}
         <div style={{ background: 'rgba(255, 255, 255, 0.05)', padding: '1.5rem', borderRadius: '8px', margin: '1.5rem auto', maxWidth: '400px', textAlign: 'right', direction: 'rtl' }}>
           <h3 style={{ marginTop: 0, marginBottom: '1rem' }}>בחירת טווח תאריכים לטיול</h3>
           <form onSubmit={handleSaveTripDates} style={{ display: 'flex', flexDirection: 'column', gap: '1rem' }}>
@@ -66,7 +84,7 @@ function App() {
               type="submit" 
               style={{ padding: '0.75rem', background: '#646cff', color: 'white', border: 'none', borderRadius: '4px', cursor: 'pointer', fontWeight: 'bold' }}
             >
-              שמור תאריכים
+              שמור תאריכים למסד הנתונים
             </button>
           </form>
 
