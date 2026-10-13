@@ -5,7 +5,6 @@ import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
 import './App.css'
 
-// חיבור ישיר ל-Supabase למניעת שגיאות בילד
 const supabaseUrl = 'https://feuiggffrildwnpjjjty.supabase.co'
 const supabaseKey = 'sb_publishable_tchXNOjzt_Mii-kqLL-PQ0_GHE6xdQ'
 const supabase = createClient(supabaseUrl, supabaseKey)
