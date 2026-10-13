@@ -139,209 +139,132 @@ function App() {
   }
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', direction: 'rtl' }}>
-      {/* כפתור תפריט צדדי מימין */}
-      <button 
-        onClick={() => setIsSidebarOpen(true)}
-        style={{
-          position: 'fixed',
-          top: '20px',
-          right: '20px',
-          background: '#0f172a',
-          color: '#fff',
-          border: 'none',
-          padding: '0.6rem 1.2rem',
-          borderRadius: '10px',
-          cursor: 'pointer',
-          fontWeight: 'bold',
-          zIndex: 100,
-          boxShadow: '0 4px 12px rgba(0,0,0,0.15)'
-        }}
-      >
-        ⚙️ ניהול וגרסאות
-      </button>
+    <div style={{ position: 'relative', minHeight: '100vh', direction: 'rtl', background: '#f8fafc', paddingBottom: '3rem', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+      
+      {/* סרגל עליון נקי עם כפתור 3 נקודות לתפריט צדדי */}
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#ffffff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 50 }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+          <span style={{ fontWeight: '800', fontSize: '1.1rem', color: '#0f172a' }}>TripMaster</span>
+        </div>
+        
+        <button 
+          onClick={() => setIsSidebarOpen(true)}
+          style={{
+            background: '#f1f5f9',
+            border: '1px solid #cbd5e1',
+            borderRadius: '8px',
+            width: '40px',
+            height: '40px',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontSize: '1.2rem',
+            fontWeight: 'bold',
+            color: '#1e293b'
+          }}
+          title="תפריט ניהול"
+        >
+          ⋮
+        </button>
+      </header>
 
-      {/* תפריט צדדי נפתח מימין */}
+      {/* תפריט צדדי נפתח מימין (Drawer) עם רקע מוצלל */}
       {isSidebarOpen && (
-        <div style={{
-          position: 'fixed',
-          top: 0,
-          right: 0,
-          width: '320px',
-          height: '100vh',
-          background: '#ffffff',
-          boxShadow: '-5px 0 25px rgba(0,0,0,0.15)',
-          zIndex: 1000,
-          padding: '2rem 1.5rem',
-          boxSizing: 'border-box',
-          overflowY: 'auto',
-          textAlign: 'right'
-        }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-            <h3 style={{ margin: 0, fontSize: '1.2rem', color: '#0f172a' }}>ניהול ובקרת גרסאות</h3>
-            <button 
-              onClick={() => setIsSidebarOpen(false)}
-              style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#64748b' }}
-            >
-              ✕
-            </button>
-          </div>
-
-          {!isAdminAuthenticated ? (
-            <form onSubmit={handleAdminLogin}>
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.5rem', fontWeight: 'bold' }}>סיסמת מנהל על</label>
-                <input 
-                  type="password" 
-                  value={adminPasswordInput} 
-                  onChange={e => setAdminPasswordInput(e.target.value)}
-                  placeholder="הכנס סיסמה..."
-                  style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1' }}
-                />
-              </div>
-              <button type="submit" className="submit-btn" style={{ background: '#0f172a', width: '100%', padding: '0.6rem', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>התחבר</button>
-            </form>
-          ) : (
+        <div 
+          onClick={() => setIsSidebarOpen(false)}
+          style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 999, backdropFilter: 'blur(2px)' }}
+        >
+          <div 
+            onClick={e => e.stopPropagation()}
+            style={{
+              position: 'fixed',
+              top: 0,
+              right: 0,
+              width: '300px',
+              height: '100vh',
+              background: '#ffffff',
+              boxShadow: '-10px 0 30px rgba(0,0,0,0.1)',
+              zIndex: 1000,
+              padding: '1.5rem',
+              boxSizing: 'border-box',
+              overflowY: 'auto',
+              display: 'flex',
+              flexDirection: 'column',
+              justifyContent: 'space-between'
+            }}
+          >
             <div>
-              <div style={{ background: '#ecfdf5', color: '#065f46', padding: '0.75rem', borderRadius: '8px', fontSize: '0.85rem', marginBottom: '1.5rem', fontWeight: 'bold' }}>
-                ✅ מחובר כמנהל העל
-              </div>
-
-              <button 
-                type="button" 
-                onClick={handleSaveNewVersion} 
-                style={{ background: '#10b981', color: '#fff', width: '100%', padding: '0.6rem', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '1.5rem' }}
-              >
-                💾 צור גרסה חדשה (Commit)
-              </button>
-
-              <div style={{ borderTop: '1px solid #e2e8f0', paddingTop: '1rem' }}>
-                <label style={{ fontSize: '0.85rem', fontWeight: '600', marginBottom: '0.5rem', display: 'block' }}>שחזור מערכת (Disaster Recovery):</label>
-                <select 
-                  value={selectedVersionToRestore} 
-                  onChange={e => setSelectedVersionToRestore(e.target.value)}
-                  style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1', marginBottom: '0.75rem' }}
-                >
-                  <option value="">בחר גרסה לשחזור...</option>
-                  {versionsHistory.map(ver => (
-                    <option key={ver.versionNumber} value={ver.versionNumber}>
-                      {ver.versionNumber} - {ver.timestamp}
-                    </option>
-                  ))}
-                </select>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem', color: '#0f172a' }}>תפריט ניהול מערכת</h3>
                 <button 
-                  type="button" 
-                  onClick={handleRestoreVersion}
-                  style={{ width: '100%', padding: '0.6rem', background: '#f59e0b', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}
+                  onClick={() => setIsSidebarOpen(false)}
+                  style={{ background: 'none', border: 'none', fontSize: '1.2rem', cursor: 'pointer', color: '#64748b' }}
                 >
-                  שחזר גרסה נבחרת
+                  ✕
                 </button>
               </div>
-            </div>
-          )}
-        </div>
-      )}
 
-      {/* לוגו וכותרת */}
-      <div className="hero" style={{ textAlign: 'center', padding: '2rem 0' }}>
-        <img src={heroImg} className="base" width="100" height="105" alt="" />
-        <div style={{ display: 'inline-flex', gap: '0.5rem', marginTop: '0.5rem' }}>
-          <img src={reactLogo} width="30" alt="" />
-          <img src={viteLogo} width="30" alt="" />
-        </div>
-      </div>
-
-      <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
-        <h1 style={{ fontSize: '1.8rem', color: '#0f172a', margin: '0 0 0.5rem 0' }}>תכנון נסיעות וחופשות</h1>
-        <p style={{ color: '#64748b', margin: 0 }}>ניהול מסלולים חכם, נקודות ציון וסנכרון מלא</p>
-      </div>
-
-      {/* תוכן ראשי לפי שלבים */}
-      <div style={{ maxWidth: '600px', margin: '0 auto', padding: '0 1rem' }}>
-        {currentStep === 'setup' ? (
-          <div className="trip-card" style={{ background: '#fff', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
-            <h3 style={{ marginTop: 0, color: '#1e293b', marginBottom: '1.2rem' }}>שלב 1: הגדרת יעד הטיול והמסגרת</h3>
-            <form onSubmit={handleSaveSetup}>
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>יעד הטיול</label>
-                <input 
-                  type="text" 
-                  value={destination} 
-                  onChange={e => setDestination(e.target.value)}
-                  placeholder="לדוגמה: איטליה - צפון אגם גארדה"
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }}
-                />
-              </div>
-              <div className="form-group" style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>תאריך התחלה</label>
-                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }} />
-              </div>
-              <div className="form-group" style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.9rem' }}>תאריך סיום</label>
-                <input type="date" value={endDate} min={startDate} onChange={e => setEndDate(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box' }} />
-              </div>
-              <button type="submit" style={{ width: '100%', padding: '0.8rem', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer' }}>
-                המשך לתכנון המסלולים ⬅️
-              </button>
-            </form>
-          </div>
-        ) : (
-          <div className="trip-card" style={{ background: '#fff', padding: '1.5rem', borderRadius: '12px', boxShadow: '0 4px 20px rgba(0,0,0,0.05)', border: '1px solid #e2e8f0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', borderBottom: '2px solid #f1f5f9', paddingBottom: '0.75rem' }}>
-              <h3 style={{ margin: 0, color: '#1e293b' }}>יעד: {destination}</h3>
-              <button 
-                onClick={() => setCurrentStep('setup')}
-                style={{ background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer', fontWeight: 'bold' }}
-              >
-                ✏️ ערוך פרטים
-              </button>
-            </div>
-
-            {/* בחירת יום */}
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-              {itinerary.map(day => (
-                <button
-                  key={day.dayNumber}
-                  type="button"
-                  onClick={() => setSelectedDay(day.dayNumber)}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '8px',
-                    border: selectedDay === day.dayNumber ? '2px solid #6366f1' : '1px solid #cbd5e1',
-                    background: selectedDay === day.dayNumber ? '#e0e7ff' : '#fff',
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    whiteSpace: 'nowrap'
-                  }}
-                >
-                  יום {day.dayNumber}
-                </button>
-              ))}
-            </div>
-
-            {/* אטרקציות וניווט */}
-            {itinerary.filter(d => d.dayNumber === selectedDay).map(day => (
-              <div key={day.dayNumber}>
-                <h4 style={{ color: '#4f46e5', marginBottom: '1rem' }}>{day.title}</h4>
-                {day.attractions.map(attr => (
-                  <div key={attr.id} style={{ background: '#f8fafc', padding: '1rem', borderRadius: '8px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                    <div>
-                      <div style={{ fontWeight: '700', color: '#1e293b' }}>{attr.name}</div>
-                      <div style={{ fontSize: '0.85rem', color: '#64748b' }}>📍 {attr.location}</div>
+              {/* אזור ניהול העל והגרסאות */}
+              <div style={{ marginBottom: '2rem' }}>
+                <h4 style={{ fontSize: '0.95rem', color: '#4f46e5', marginBottom: '1rem' }}>🔒 אזור מנהל על (Disaster Recovery)</h4>
+                
+                {!isAdminAuthenticated ? (
+                  <form onSubmit={handleAdminLogin}>
+                    <div style={{ marginBottom: '0.75rem' }}>
+                      <label style={{ display: 'block', fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.3rem', color: '#475569' }}>סיסמת מנהל</label>
+                      <input 
+                        type="password" 
+                        value={adminPasswordInput} 
+                        onChange={e => setAdminPasswordInput(e.target.value)}
+                        placeholder="הכנס סיסמה..."
+                        style={{ width: '100%', padding: '0.6rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.9rem', boxSizing: 'border-box' }}
+                      />
                     </div>
-                    <div style={{ display: 'flex', gap: '0.4rem' }}>
-                      <button onClick={() => openWaze(attr.location)} style={{ padding: '0.4rem 0.6rem', background: '#33ccff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.75rem' }}>Waze</button>
-                      <button onClick={() => openGoogleMaps(attr.location)} style={{ padding: '0.4rem 0.6rem', background: '#34a853', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.75rem' }}>Maps</button>
+                    <button type="submit" style={{ width: '100%', padding: '0.6rem', background: '#0f172a', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.85rem', cursor: 'pointer' }}>התחבר כמנהל</button>
+                  </form>
+                ) : (
+                  <div>
+                    <div style={{ background: '#ecfdf5', color: '#065f46', padding: '0.5rem', borderRadius: '6px', fontSize: '0.8rem', marginBottom: '1rem', fontWeight: 'bold' }}>
+                      ✅ מחובר כמנהל על
+                    </div>
+
+                    <button 
+                      type="button" 
+                      onClick={handleSaveNewVersion} 
+                      style={{ background: '#10b981', color: '#fff', width: '100%', padding: '0.6rem', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.85rem', cursor: 'pointer', marginBottom: '1rem' }}
+                    >
+                      💾 צור גרסה חדשה (Commit)
+                    </button>
+
+                    <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
+                      <label style={{ fontSize: '0.8rem', fontWeight: '600', marginBottom: '0.4rem', display: 'block', color: '#475569' }}>שחזור מערכת מגרסה:</label>
+                      <select 
+                        value={selectedVersionToRestore} 
+                        onChange={e => setSelectedVersionToRestore(e.target.value)}
+                        style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1', marginBottom: '0.5rem', fontSize: '0.85rem' }}
+                      >
+                        <option value="">בחר גרסה לשחזור...</option>
+                        {versionsHistory.map(ver => (
+                          <option key={ver.versionNumber} value={ver.versionNumber}>
+                            {ver.versionNumber} - {ver.timestamp}
+                          </option>
+                        ))}
+                      </select>
+                      <button 
+                        type="button" 
+                        onClick={handleRestoreVersion}
+                        style={{ width: '100%', padding: '0.5rem', background: '#f59e0b', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.85rem', cursor: 'pointer' }}
+                      >
+                        שחזר גרסה
+                      </button>
                     </div>
                   </div>
-                ))}
+                )}
               </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
 
-export default App
+              {/* אזור לפונקציות עתידיות שיווספו לתפריט */}
+              <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
+                <h4 style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.5rem' }}>פעולות נוספות במערכת</h4>
+                <div style={{ fontSize: '0.85rem', color: '#94a3b8', padding: '0.4rem 0' }}>• ניהול משתמשים (בקרוב)</div>
+                <div style={{ fontSize: '0.85rem', color: '#94a3b8', padding: '0.4rem 0' }}>• הג
