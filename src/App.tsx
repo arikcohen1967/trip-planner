@@ -1,9 +1,14 @@
 import { useState } from 'react'
+import { createClient } from '@supabase/supabase-js'
 import heroImg from './assets/hero.png'
 import reactLogo from './assets/react.svg'
 import viteLogo from './assets/vite.svg'
-import { supabase } from './supabaseClient'
 import './App.css'
+
+// חיבור ישיר ל-Supabase למניעת שגיאות בילד
+const supabaseUrl = 'https://feuiggffrildwnpjjjty.supabase.co'
+const supabaseKey = 'sb_publishable_tchXNOjzt_Mii-kqLL-PQ0_GHE6xdQ'
+const supabase = createClient(supabaseUrl, supabaseKey)
 
 function App() {
   const [count, setCount] = useState<number>(0)
