@@ -149,4 +149,25 @@ export default function App() {
   const fetchVersions = async () => {
     try {
       const { data, error } = await supabase
-        .from('app_
+        .from('app_versions')
+        .select('*')
+        .order('created_at', { ascending: false })
+      if (!error && data && data.length > 0) {
+        setVersionsHistory(data.map((item: any) => item.version_data))
+      }
+    } catch (err) {
+      console.error('שגיאה בטעינת גרסאות מ-Supabase:', err)
+    }
+  }
+
+  const handleAdminLogin = (e: React.FormEvent) => {
+    e.preventDefault()
+    if (adminPasswordInput === ADMIN_PASSWORD) {
+      setIsAdminAuthenticated(true)
+      alert('התחברת בהצלחה כמנהל על!')
+    } else {
+      alert('סיסמת מנהל שגויה.')
+    }
+  }
+
+  const handleSaveNewVersion = async () =>
