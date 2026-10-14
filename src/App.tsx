@@ -145,10 +145,33 @@ function App() {
   }
 
   return (
-    <div style={{ position: 'relative', minHeight: '100vh', direction: 'rtl', background: '#f8fafc', paddingBottom: '3rem', fontFamily: 'system-ui, -apple-system, sans-serif' }}>
+    <div style={{ 
+      position: 'fixed', 
+      inset: 0, 
+      width: '100vw', 
+      height: '100vh', 
+      overflowY: 'auto', 
+      direction: 'rtl', 
+      background: '#f8fafc', 
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      boxSizing: 'border-box',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
       
-      {/* סרגל עליון נקי עם כפתור 3 נקודות לתפריט צדדי */}
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#ffffff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 50 }}>
+      {/* סרגל עליון קבוע (Sticky) */}
+      <header style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        padding: '1rem 1.5rem', 
+        background: '#ffffff', 
+        borderBottom: '1px solid #e2e8f0', 
+        position: 'sticky', 
+        top: 0, 
+        zIndex: 50,
+        flexShrink: 0
+      }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
           <span style={{ fontWeight: '800', fontSize: '1.1rem', color: '#0f172a' }}>✈️ TripMaster</span>
         </div>
@@ -175,7 +198,7 @@ function App() {
         </button>
       </header>
 
-      {/* תפריט צדדי נפתח מימין (Drawer) עם רקע מוצלל */}
+      {/* תפריט צדדי נפתח מימין (Drawer) */}
       {isSidebarOpen && (
         <div 
           onClick={() => setIsSidebarOpen(false)}
@@ -269,7 +292,6 @@ function App() {
                 )}
               </div>
 
-              {/* אזור לפונקציות עתידיות שיווספו לתפריט */}
               <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
                 <h4 style={{ fontSize: '0.9rem', color: '#64748b', marginBottom: '0.5rem' }}>פעולות נוספות במערכת</h4>
                 <div style={{ fontSize: '0.85rem', color: '#94a3b8', padding: '0.4rem 0' }}>• ניהול משתמשים (בקרוב)</div>
@@ -284,8 +306,8 @@ function App() {
         </div>
       )}
 
-      {/* תוכן ראשי מעוצב */}
-      <div style={{ maxWidth: '500px', margin: '2rem auto 0 auto', padding: '0 1rem' }}>
+      {/* תוכן ראשי נעול ומסודר */}
+      <div style={{ maxWidth: '500px', width: '100%', margin: '2rem auto', padding: '0 1rem', boxSizing: 'border-box', flex: 1 }}>
         
         {/* כותרת מרכזית */}
         <div style={{ textAlign: 'center', marginBottom: '2rem' }}>
@@ -294,7 +316,7 @@ function App() {
         </div>
 
         {currentStep === 'setup' ? (
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', boxShadow: '0 4px 25px rgba(0,0,0,0.04)', border: '1px solid #e2e8f0' }}>
+          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', boxShadow: '0 4px 25px rgba(0,0,0,0.04)', border: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
             <h3 style={{ marginTop: 0, color: '#1e293b', marginBottom: '1.2rem', fontSize: '1.1rem' }}>שלב 1: הגדרת יעד הטיול והמסגרת</h3>
             <form onSubmit={handleSaveSetup}>
               <div style={{ marginBottom: '1rem' }}>
@@ -304,80 +326,8 @@ function App() {
                   value={destination} 
                   onChange={e => setDestination(e.target.value)}
                   placeholder="לדוגמה: איטליה - צפון אגם גארדה"
-                  style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #cbd5e1', boxSizing: 'border-box', fontSize: '0.95rem' }}
+                  style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #cbd5e1', boxSizing: 'border-box', fontSize: '16px' }}
                 />
               </div>
               <div style={{ marginBottom: '1rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.85rem', color: '#475569' }}>תאריך התחלה</label>
-                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #cbd5e1', boxSizing: 'border-box', fontSize: '0.95rem' }} />
-              </div>
-              <div style={{ marginBottom: '1.5rem' }}>
-                <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.85rem', color: '#475569' }}>תאריך סיום</label>
-                <input type="date" value={endDate} min={startDate} onChange={e => setEndDate(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', border: '1px solid #cbd5e1', boxSizing: 'border-box', fontSize: '0.95rem' }} />
-              </div>
-              <button type="submit" style={{ width: '100%', padding: '0.85rem', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '1rem', cursor: 'pointer', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)' }}>
-                המשך לתכנון המסלולים ⬅️
-              </button>
-            </form>
-          </div>
-        ) : (
-          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', boxShadow: '0 4px 25px rgba(0,0,0,0.04)', border: '1px solid #e2e8f0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.2rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
-              <h3 style={{ margin: 0, color: '#1e293b', fontSize: '1.1rem' }}>יעד: {destination}</h3>
-              <button 
-                onClick={() => setCurrentStep('setup')}
-                style={{ background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.85rem' }}
-              >
-                ✏️ ערוך פרטים
-              </button>
-            </div>
-
-            {/* בחירת יום */}
-            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1.5rem', overflowX: 'auto', paddingBottom: '0.5rem' }}>
-              {itinerary.map(day => (
-                <button
-                  key={day.dayNumber}
-                  type="button"
-                  onClick={() => setSelectedDay(day.dayNumber)}
-                  style={{
-                    padding: '0.5rem 1rem',
-                    borderRadius: '8px',
-                    border: selectedDay === day.dayNumber ? '2px solid #6366f1' : '1px solid #cbd5e1',
-                    background: selectedDay === day.dayNumber ? '#e0e7ff' : '#fff',
-                    cursor: 'pointer',
-                    fontWeight: 'bold',
-                    whiteSpace: 'nowrap',
-                    fontSize: '0.9rem'
-                  }}
-                >
-                  יום {day.dayNumber}
-                </button>
-              ))}
-            </div>
-
-            {/* אטרקציות וניווט */}
-            {itinerary.filter(d => d.dayNumber === selectedDay).map(day => (
-              <div key={day.dayNumber}>
-                <h4 style={{ color: '#4f46e5', marginBottom: '1rem', fontSize: '1rem' }}>{day.title}</h4>
-                {day.attractions.map(attr => (
-                  <div key={attr.id} style={{ background: '#f8fafc', padding: '1rem', borderRadius: '12px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-                    <div>
-                      <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '0.95rem' }}>{attr.name}</div>
-                      <div style={{ fontSize: '0.8rem', color: '#64748b', marginTop: '0.2rem' }}>📍 {attr.location}</div>
-                    </div>
-                    <div style={{ display: 'flex', gap: '0.4rem' }}>
-                      <button onClick={() => openWaze(attr.location)} style={{ padding: '0.4rem 0.6rem', background: '#33ccff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.75rem' }}>Waze</button>
-                      <button onClick={() => openGoogleMaps(attr.location)} style={{ padding: '0.4rem 0.6rem', background: '#34a853', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.75rem' }}>Maps</button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
-      </div>
-    </div>
-  )
-}
-
-export default App
+                <label style={{ display: 'block', marginBottom: '0.4rem', fontWeight: '600', fontSize: '0.85rem',
