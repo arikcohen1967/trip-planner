@@ -170,4 +170,249 @@ export default function App() {
     }
   }
 
-  const handleSaveNewVersion = async () =>
+  const handleSaveNewVersion = async () => {
+    if (!isAdminAuthenticated) {
+      alert('נדרשת התחברות מנהל.')
+      return
+    }
+    const nextVersionNum = `v2.${versionsHistory.length + 1}`
+    const newVersionObj: AppVersion = {
+      versionNumber: nextVersionNum,
+      timestamp: new Date().toLocaleString('he-IL'),
+      destination,
+      startDate,
+      endDate,
+      hotelAddress,
+      itinerary
+    }
+
+    try {
+      const { error } = await supabase.from('app_versions').insert([
+        { version_number: nextVersionNum, version_data: newVersionObj }
+      ])
+      if (!error) {
+        alert(`גרסה ${nextVersionNum} נשמרה בהצלחה בענן!`)
+        fetchVersions()
+      } else {
+        alert('שגיאה בשמירה בענן.')
+      }
+    } catch (err) {
+      console.error(err)
+    }
+  }
+
+  const handleRestoreVersion = () => {
+    if (!isAdminAuthenticated) return
+    const target = versionsHistory.find(v => v.versionNumber === selectedVersionToRestore)
+    if (target) {
+      setDestination(target.destination)
+      setStartDate(target.startDate)
+      setEndDate(target.endDate)
+      setHotelAddress(target.hotelAddress || '')
+      setItinerary(target.itinerary)
+      alert(`שוחזרה גרסה ${target.versionNumber} בהצלחה!`)
+      setIsVersionModalOpen(false)
+    }
+  }
+
+  const handleExportJSON = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ destination, startDate, endDate, hotelAddress, itinerary }))
+    const downloadAnchor = document.createElement('a')
+    downloadAnchor.setAttribute("href", dataStr)
+    downloadAnchor.setAttribute("download", `trip_${destination.replace(/\s+/g, '_')}.json`)
+    document.body.appendChild(downloadAnchor)
+    downloadAnchor.click()
+    downloadAnchor.remove()
+  }
+
+  const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const fileReader = new FileReader()
+    if (e.target.files && e.target.files[0]) {
+      fileReader.readAsText(e.target.files[0], "UTF-8")
+      fileReader.onload = event => {
+        try {
+          const parsed = JSON.parse(event.target?.result as string)
+          if (parsed.destination && parsed.itinerary) {
+            setDestination(parsed.destination)
+            setStartDate(parsed.startDate || '')
+            setEndDate(parsed.endDate || '')
+            setHotelAddress(parsed.hotelAddress || '')
+            setItinerary(parsed.itinerary)
+            alert('הטיול נטען בהצלחה מהקובץ!')
+            setCurrentStep('itinerary')
+          }
+        } catch (err) {
+          alert('קובץ לא תקין.')
+        }
+      }
+    }
+  }
+
+  const handleExcelUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0]
+    if (!file) return
+
+    const reader = new FileReader()
+    reader.onload = (evt) => {
+      const text = evt.target?.result as string
+      const lines = text.split('\n').filter(l => l.trim() !== '')
+      const newDays: DayItinerary[] = []
+      
+      let currentDayNum = 1
+      let currentDayAttractions: Attraction[] = []
+
+      lines.forEach((line, idx) => {
+        const parts = line.split(',')
+        if (parts.length >= 2) {
+          const attrName = parts[0].trim()
+          const attrLoc = parts[1].trim()
+          const type = parts[2]?.trim() === 'food' ? 'food' : 'attraction'
+
+          currentDayAttractions.push({
+            id: `excel_${idx}`,
+            name: attrName,
+            location: attrLoc,
+            type: type
+          })
+        }
+
+        if (currentDayAttractions.length >= 3 || idx === lines.length - 1) {
+          if (currentDayAttractions.length > 0) {
+            newDays.push({
+              dayNumber: currentDayNum,
+              title: `יום טיול אוטומטי ${currentDayNum}`,
+              attractions: [...currentDayAttractions]
+            })
+            currentDayNum++
+            currentDayAttractions = []
+          }
+        }
+      })
+
+      if (newDays.length > 0) {
+        setItinerary(newDays)
+        setCurrentStep('itinerary')
+        alert(`האקסל פוענח בהצלחה! נוצרו ${newDays.length} ימי טיול עם ניווט ומקומות עצירה.`)
+      } else {
+        alert('לא זוהו שורות תקינות בקובץ. וודא שפורמט השורות הוא: שם מקום, כתובת')
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  const openWaze = (location: string) => {
+    window.open(`https://www.waze.com/ul?q=${encodeURIComponent(location)}&navigate=yes`, '_blank')
+  }
+
+  const navigateToHotel = () => {
+    if (!hotelAddress) {
+      alert('לא הוגדרה כתובת מלון.')
+      return
+    }
+    openWaze(hotelAddress)
+  }
+
+  return (
+    <div style={{ 
+      position: 'fixed', 
+      inset: 0, 
+      width: '100vw', 
+      height: '100vh', 
+      overflowY: 'auto', 
+      direction: 'rtl', 
+      background: '#f8fafc', 
+      fontFamily: 'system-ui, -apple-system, sans-serif',
+      boxSizing: 'border-box',
+      display: 'flex',
+      flexDirection: 'column'
+    }}>
+      
+      <header style={{ 
+        display: 'flex', 
+        justifyContent: 'space-between', 
+        alignItems: 'center', 
+        padding: '0.75rem 1.25rem', 
+        background: '#ffffff', 
+        borderBottom: '1px solid #e2e8f0', 
+        position: 'sticky', 
+        top: 0, 
+        zIndex: 50,
+        flexShrink: 0,
+        boxSizing: 'border-box'
+      }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
+          <span style={{ fontWeight: '700', fontSize: '1rem', color: '#0f172a' }}>TripMaster</span>
+          
+          <button 
+            onClick={() => setIsVersionModalOpen(true)}
+            style={{
+              height: '38px',
+              background: '#e0e7ff',
+              border: '1px solid #c7d2fe',
+              borderRadius: '8px',
+              padding: '0 0.85rem',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              fontWeight: 'bold',
+              color: '#4f46e5',
+              display: 'flex',
+              alignItems: 'center',
+              boxSizing: 'border-box'
+            }}
+            title="ניהול גרסאות ושחזור מערכת (מוגן סיסמה)"
+          >
+            {APP_VERSION_LABEL}
+          </button>
+        </div>
+        
+        <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
+          <button 
+            onClick={navigateToHotel}
+            style={{
+              height: '38px',
+              background: '#f1f5f9',
+              border: '1px solid #cbd5e1',
+              borderRadius: '8px',
+              padding: '0 0.85rem',
+              cursor: 'pointer',
+              fontSize: '0.8rem',
+              fontWeight: 'bold',
+              color: '#1e293b',
+              display: 'flex',
+              alignItems: 'center',
+              gap: '0.4rem',
+              boxSizing: 'border-box'
+            }}
+            title="נווט למלון ב-Waze"
+          >
+            🏨 למלון
+          </button>
+
+          <div style={{ 
+            height: '38px',
+            background: '#f1f5f9',
+            border: '1px solid #cbd5e1',
+            borderRadius: '8px',
+            padding: '0 0.85rem',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.4rem',
+            fontSize: '0.8rem',
+            fontWeight: 'bold',
+            color: '#1e293b',
+            boxSizing: 'border-box'
+          }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isOnline ? '#10b981' : '#ef4444', display: 'inline-block' }}></span>
+            {isOnline ? 'Online' : 'Offline'}
+          </div>
+
+          <button 
+            onClick={() => { setActiveTabInSidebar('menu'); setIsSidebarOpen(true); }}
+            style={{
+              height: '38px',
+              width: '38px',
+              background: '#f1f5f9',
+              border: '1px solid #cbd5e1',
+              borderRadius: '8px',
+              display: 'flex',
+              alignItems: 'center',
