@@ -63,7 +63,7 @@ export default function App() {
   const [isOnline, setIsOnline] = useState<boolean>(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
   
-  // פופ-אפ ניהול גרסאות בלחיצה על מספר הגרסה
+  // פופ-אפ ניהול גרסאות בלחיצה על מספר הגרסה למעלה
   const [isVersionModalOpen, setIsVersionModalOpen] = useState<boolean>(false)
   const [adminPasswordInput, setAdminPasswordInput] = useState<string>('')
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false)
@@ -292,3 +292,34 @@ export default function App() {
 
       if (newDays.length > 0) {
         setItinerary(newDays)
+        setCurrentStep('itinerary')
+        alert(`האקסל פוענח בהצלחה! נוצרו ${newDays.length} ימי טיול עם ניווט ומקומות עצירה.`)
+      } else {
+        alert('לא זוהו שורות תקינות בקובץ. וודא שפורמט השורות הוא: שם מקום, כתובת')
+      }
+    }
+    reader.readAsText(file)
+  }
+
+  const openWaze = (location: string) => {
+    window.open(`https://www.waze.com/ul?q=${encodeURIComponent(location)}&navigate=yes`, '_blank')
+  }
+
+  const navigateToHotel = () => {
+    if (!hotelAddress) {
+      alert('לא הוגדרה כתובת מלון.')
+      return
+    }
+    openWaze(hotelAddress)
+  }
+
+  return (
+    <div style={{ 
+      position: 'fixed', 
+      inset: 0, 
+      width: '100vw', 
+      height: '100vh', 
+      overflowY: 'auto', 
+      direction: 'rtl', 
+      background: '#f8fafc', 
+      fontFamily: 'system-ui, -apple-system, sans-
