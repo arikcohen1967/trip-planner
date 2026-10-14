@@ -1,8 +1,5 @@
 import { useState, useEffect } from 'react'
 import { createClient } from '@supabase/supabase-js'
-import heroImg from './assets/hero.png'
-import reactLogo from './assets/react.svg'
-import viteLogo from './assets/vite.svg'
 import './App.css'
 
 const supabaseUrl = 'https://feuiggffrildwnpjjjty.supabase.co'
@@ -28,6 +25,8 @@ interface AppVersion {
   timestamp: string
   itinerary: DayItinerary[]
   destination: string
+  startDate?: string
+  endDate?: string
 }
 
 function App() {
@@ -93,7 +92,9 @@ function App() {
       versionNumber: nextVersionNum,
       timestamp: new Date().toLocaleString('he-IL'),
       itinerary,
-      destination
+      destination,
+      startDate,
+      endDate
     }
 
     try {
@@ -104,6 +105,8 @@ function App() {
       if (!error) {
         alert(`גרסה ${nextVersionNum} נשמרה בהצלחה!`)
         fetchVersions()
+      } else {
+        alert('שגיאה בשמירת הגרסה במסד הנתונים.')
       }
     } catch (err) {
       console.error(err)
@@ -114,8 +117,11 @@ function App() {
     if (!isAdminAuthenticated) return
     const targetVersion = versionsHistory.find(v => v.versionNumber === selectedVersionToRestore)
     if (targetVersion) {
-      setItinerary(targetVersion.itinerary)
-      setDestination(targetVersion.destination)
+      setItinerary(targetVersion.itinerary || [])
+      setDestination(targetVersion.destination || '')
+      if (targetVersion.startDate) setStartDate(targetVersion.startDate)
+      if (targetVersion.endDate) setEndDate(targetVersion.endDate)
+      
       alert(`האפליקציה שוחזרה לגרסה ${targetVersion.versionNumber}!`)
       setIsSidebarOpen(false)
     }
@@ -144,7 +150,7 @@ function App() {
       {/* סרגל עליון נקי עם כפתור 3 נקודות לתפריט צדדי */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '1rem 1.5rem', background: '#ffffff', borderBottom: '1px solid #e2e8f0', position: 'sticky', top: 0, zIndex: 50 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-          <span style={{ fontWeight: '800', fontSize: '1.1rem', color: '#0f172a' }}>TripMaster</span>
+          <span style={{ fontWeight: '800', fontSize: '1.1rem', color: '#0f172a' }}>✈️ TripMaster</span>
         </div>
         
         <button 
