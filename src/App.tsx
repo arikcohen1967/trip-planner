@@ -19,25 +19,19 @@ interface DayItinerary {
 export default function App() {
   const [currentStep, setCurrentStep] = useState<'setup' | 'itinerary'>('setup')
   const [isOnline, setIsOnline] = useState<boolean>(true)
-  const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
-  
-  const [isVersionModalOpen, setIsVersionModalOpen] = useState<boolean>(false)
-  const [adminPasswordInput, setAdminPasswordInput] = useState<string>('')
-  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false)
-
   const [destination, setDestination] = useState<string>('צפון אגם גארדה, איטליה')
   const [hotelAddress, setHotelAddress] = useState<string>('Hotel Riva, Garda, Italy')
   const [itinerary, setItinerary] = useState<DayItinerary[]>([
     {
       dayNumber: 1,
-      title: 'הגעה וסיור היכרות באגם',
-      attractions: [
-        { id: '101', name: 'מרכז העיר העתיקה', location: 'Riva del Garda, Italy', type: 'attraction' },
-        { id: '102', name: 'מסעדת פיצה מומלצת', location: 'Piazza 3 Novembre, Riva del Garda', type: 'food' }
-      ]
+      title: 'הגעה וסיור היכרות',
+      attractions: [{ id: '101', name: 'מרכז העיר', location: 'Riva del Garda, Italy', type: 'attraction' }]
     }
   ])
   const [selectedDay, setSelectedDay] = useState<number>(1)
+  const [isVersionModalOpen, setIsVersionModalOpen] = useState<boolean>(false)
+  const [adminPasswordInput, setAdminPasswordInput] = useState<string>('')
+  const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false)
 
   useEffect(() => {
     if (typeof window !== 'undefined') {
@@ -52,7 +46,9 @@ export default function App() {
     if (adminPasswordInput === ADMIN_PASSWORD) {
       setIsAdminAuthenticated(true)
       alert('התחברת בהצלחה כמנהל על!')
-    } else { alert('סיסמת מנהל שגויה.') }
+    } else {
+      alert('סיסמת מנהל שגויה.')
+    }
   }
 
   const handleSavePhoneVersion = () => {
@@ -61,7 +57,7 @@ export default function App() {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(versionData, null, 2))
     const downloadAnchor = document.createElement('a')
     downloadAnchor.setAttribute("href", dataStr)
-    downloadAnchor.setAttribute("download", `TripMaster_Backup_${Date.now()}.json`)
+    downloadAnchor.setAttribute("download", `TripMaster_Backup.json`)
     document.body.appendChild(downloadAnchor)
     downloadAnchor.click()
     downloadAnchor.remove()
