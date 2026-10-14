@@ -53,9 +53,7 @@ interface TriviaQuestion {
 const TRIVIA_BANK: TriviaQuestion[] = [
   { id: 1, q: "איזה כוכב לכת קרוב ביותר לשמש?", options: ["נוגה", "חמה (מרקורי)", "מאדים", "צדק"], answer: 1 },
   { id: 2, q: "באיזו מדינה נמצא מגדל אייפל?", options: ["איטליה", "בריטניה", "צרפת", "ספרד"], answer: 2 },
-  { id: 3, q: "מהו בעל החיים המהיר ביותר ביבשה?", options: ["אריה", "ברדלס (צ'יטה)", "סוס", "צבי"], answer: 1 },
-  { id: 4, q: "כמה ימים יש בשנה מעוברת?", options: ["365", "366", "364", "360"], answer: 1 },
-  { id: 5, q: "איזה יסוד כימי מסומן באותיות Au?", options: ["כסף", "זהב", "ברזל", "נחושת"], answer: 1 }
+  { id: 3, q: "מהו בעל החיים המהיר ביותר ביבשה?", options: ["אריה", "ברדלס (צ'יטה)", "סוס", "צבי"], answer: 1 }
 ]
 
 export default function App() {
@@ -96,8 +94,7 @@ export default function App() {
   const [selectedMember, setSelectedMember] = useState<FamilyMember | null>(null)
   const [familyMembers] = useState<FamilyMember[]>([
     { id: '1', name: 'Amit Cohen 👑❤️😘', subtitle: 'שיש ביקום (הבת המועדפת)', location: 'Bat Khefer - Now', battery: 88, distance: '26 km', status: 'בטוח', address: 'Bet Keshet 28, Bat Khefer', avatar: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150' },
-    { id: '2', name: 'Yuly Cohen', subtitle: 'בן משפחה', location: 'Bat Khefer - Now', battery: 92, distance: '25 km', status: 'בטוח', address: 'Haifa St 12, Bat Khefer', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' },
-    { id: '3', name: 'Lian Cohen', subtitle: 'בן משפחה', location: 'Bat Khefer - Now', battery: 64, distance: '26 km', status: 'בדרכים', address: 'Haganim 5, Bat Khefer', avatar: 'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150' }
+    { id: '2', name: 'Yuly Cohen', subtitle: 'בן משפחה', location: 'Bat Khefer - Now', battery: 92, distance: '25 km', status: 'בטוח', address: 'Haifa St 12, Bat Khefer', avatar: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150' }
   ])
 
   useEffect(() => {
@@ -205,4 +202,104 @@ export default function App() {
           <div style={{ height: '38px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', padding: '0 0.85rem', display: 'flex', alignItems: 'center', gap: '0.4rem', fontSize: '0.8rem', fontWeight: 'bold', color: '#1e293b' }}>
             <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: isOnline ? '#10b981' : '#ef4444' }}></span>{isOnline ? 'Online' : 'Offline'}
           </div>
-          <button onClick={() => { setActiveTabInSidebar('menu'); setIsSidebarOpen(true); }} style={{ height: '38px', width: '38px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', cursor
+          <button onClick={() => { setActiveTabInSidebar('menu'); setIsSidebarOpen(true); }} style={{ height: '38px', width: '38px', background: '#f1f5f9', border: '1px solid #cbd5e1', borderRadius: '8px', cursor: 'pointer', fontSize: '1.1rem', fontWeight: 'bold', color: '#1e293b' }}>⋮</button>
+        </div>
+      </header>
+
+      {isVersionModalOpen && (
+        <div onClick={() => setIsVersionModalOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#fff', width: '100%', maxWidth: '400px', borderRadius: '16px', padding: '1.5rem', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1rem' }}>ניהול גרסאות (1967)</h3>
+              <button onClick={() => setIsVersionModalOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+            </div>
+            {!isAdminAuthenticated ? (
+              <form onSubmit={handleAdminLogin}>
+                <input type="password" value={adminPasswordInput} onChange={e => setAdminPasswordInput(e.target.value)} placeholder="סיסמה..." style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '16px', marginBottom: '0.75rem', boxSizing: 'border-box' }} />
+                <button type="submit" style={{ width: '100%', padding: '0.6rem', background: '#0f172a', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>התחבר</button>
+              </form>
+            ) : (
+              <div>
+                <button type="button" onClick={handleSaveNewVersion} style={{ background: '#10b981', color: '#fff', width: '100%', padding: '0.6rem', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', marginBottom: '1rem' }}>💾 שמור גרסה חדשה</button>
+                <select value={selectedVersionToRestore} onChange={e => setSelectedVersionToRestore(e.target.value)} style={{ width: '100%', padding: '0.5rem', borderRadius: '8px', border: '1px solid #cbd5e1', marginBottom: '0.5rem', boxSizing: 'border-box' }}>
+                  <option value="">בחר גרסה לשחזור...</option>
+                  {versionsHistory.map(ver => <option key={ver.versionNumber} value={ver.versionNumber}>{ver.versionNumber} - {ver.timestamp}</option>)}
+                </select>
+                <button type="button" onClick={handleRestoreVersion} style={{ width: '100%', padding: '0.5rem', background: '#f59e0b', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>שחזר גרסה</button>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
+
+      {isSidebarOpen && (
+        <div onClick={() => setIsSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.4)', zIndex: 999 }}>
+          <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: 0, right: 0, width: '360px', height: '100vh', background: '#ffffff', zIndex: 1000, padding: '1.5rem', boxSizing: 'border-box', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.2rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>תפריט מערכת</h3>
+                <button onClick={() => setIsSidebarOpen(false)} style={{ background: 'none', border: 'none', cursor: 'pointer' }}>✕</button>
+              </div>
+
+              <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.2rem', background: '#f1f5f9', padding: '0.3rem', borderRadius: '8px' }}>
+                <button onClick={() => setActiveTabInSidebar('menu')} style={{ flex: 1, padding: '0.45rem', borderRadius: '6px', border: 'none', background: activeTabInSidebar === 'menu' ? '#fff' : 'transparent', fontWeight: 'bold', fontSize: '0.75rem', cursor: 'pointer' }}>⚙️ ניהול</button>
+                <button onClick={() => setActiveTabInSidebar('trivia')} style={{ flex: 1, padding: '0.45rem', borderRadius: '6px', border: 'none', background: activeTabInSidebar === 'trivia' ? '#fff' : 'transparent', fontWeight: 'bold', fontSize: '0.75rem', cursor: 'pointer' }}>🎯 טריוויה</button>
+                <button onClick={() => setActiveTabInSidebar('radar')} style={{ flex: 1, padding: '0.45rem', borderRadius: '6px', border: 'none', background: activeTabInSidebar === 'radar' ? '#fff' : 'transparent', fontWeight: 'bold', fontSize: '0.75rem', cursor: 'pointer' }}>🛰️ מצא את</button>
+              </div>
+
+              {activeTabInSidebar === 'menu' && (
+                <div>
+                  <div style={{ background: '#f8fafc', padding: '0.85rem', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '1rem' }}>
+                    <h4 style={{ fontSize: '0.85rem', marginTop: 0 }}>📊 טעינת אקסל</h4>
+                    <input type="file" accept=".csv, .xlsx, .txt" onChange={handleExcelUpload} style={{ fontSize: '0.75rem', width: '100%' }} />
+                  </div>
+                </div>
+              )}
+
+              {activeTabInSidebar === 'radar' && (
+                <div style={{ background: '#1c1c1e', borderRadius: '16px', padding: '1rem', color: '#fff' }}>
+                  <div style={{ fontSize: '1.2rem', fontWeight: 'bold', marginBottom: '0.8rem' }}>People</div>
+                  {familyMembers.map(m => (
+                    <div key={m.id} onClick={() => openWaze(m.address)} style={{ background: '#2c2c2e', padding: '0.75rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', marginBottom: '0.5rem' }}>
+                      <img src={m.avatar} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                      <div style={{ flex: 1 }}>
+                        <div style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>{m.name}</div>
+                        <div style={{ fontSize: '0.7rem', color: '#8e8e93' }}>{m.location}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={{ maxWidth: '550px', width: '100%', margin: '1.5rem auto', padding: '0 1rem', boxSizing: 'border-box', flex: 1 }}>
+        {currentStep === 'setup' ? (
+          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
+            <h3 style={{ marginTop: 0, fontSize: '1rem' }}>הגדרת יעדים ומלון מרכזי</h3>
+            <input type="text" value={destination} onChange={e => setDestination(e.target.value)} style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '16px', marginBottom: '0.75rem', boxSizing: 'border-box' }} />
+            <input type="text" value={hotelAddress} onChange={e => setHotelAddress(e.target.value)} placeholder="כתובת מלון" style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', fontSize: '16px', marginBottom: '1rem', boxSizing: 'border-box' }} />
+            <button onClick={() => setCurrentStep('itinerary')} style={{ width: '100%', padding: '0.75rem', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>המשך למסלולים ⬅️</button>
+          </div>
+        ) : (
+          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', border: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
+            <h3 style={{ fontSize: '1rem', marginBottom: '1rem' }}>יעד: {destination}</h3>
+            {itinerary.map(day => (
+              <div key={day.dayNumber}>
+                <h4 style={{ color: '#4f46e5' }}>{day.title}</h4>
+                {day.attractions.map(attr => (
+                  <div key={attr.id} style={{ background: '#f8fafc', padding: '0.8rem', borderRadius: '10px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem' }}>
+                    <span>{attr.name}</span>
+                    <button onClick={() => openWaze(attr.location)} style={{ padding: '0.35rem 0.6rem', background: '#33ccff', border: 'none', borderRadius: '6px', cursor: 'pointer' }}>Waze</button>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
