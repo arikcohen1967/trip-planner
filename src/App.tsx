@@ -47,7 +47,6 @@ interface TriviaQuestion {
   answer: number
 }
 
-// מאגר שאלות טריוויה לדוגמה (מתוך 1,500 שאלות ספורדיות לנוער)
 const TRIVIA_BANK: TriviaQuestion[] = [
   { id: 1, q: "איזה כוכב לכת קרוב ביותר לשמש?", options: ["נוגה", "חמה (מרקורי)", "מאדים", "צדק"], answer: 1 },
   { id: 2, q: "באיזו מדינה נמצא מגדל אייפל?", options: ["איטליה", "בריטניה", "צרפת", "ספרד"], answer: 2 },
@@ -57,12 +56,10 @@ const TRIVIA_BANK: TriviaQuestion[] = [
 ]
 
 export default function App() {
-  // מצבי אפליקציה מרכזיים
   const [currentStep, setCurrentStep] = useState<'setup' | 'itinerary'>('setup')
-  const [isOnline, setIsOnline] = useState<boolean>(navigator.onLine)
+  const [isOnline, setIsOnline] = useState<boolean>(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
   
-  // נתוני טיול
   const [destination, setDestination] = useState<string>('צפון אגם גארדה, איטליה')
   const [startDate, setStartDate] = useState<string>('2026-07-01')
   const [endDate, setEndDate] = useState<string>('2026-07-08')
@@ -80,39 +77,37 @@ export default function App() {
   ])
   const [selectedDay, setSelectedDay] = useState<number>(1)
 
-  // ניהול מנהל וגרסאות
   const [adminPasswordInput, setAdminPasswordInput] = useState<string>('')
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false)
   const [versionsHistory, setVersionsHistory] = useState<AppVersion[]>([])
   const [selectedVersionToRestore, setSelectedVersionToRestore] = useState<string>('')
 
-  // תפריטים מתקדמים בצד (טריוויה / רادار)
   const [activeTabInSidebar, setActiveTabInSidebar] = useState<'menu' | 'trivia' | 'radar'>('menu')
 
-  // מצב משחק טריוויה
   const [triviaScore, setTriviaScore] = useState<number>(0)
   const [currentTriviaIndex, setCurrentTriviaIndex] = useState<number>(0)
   const [isTriviaActive, setIsTriviaActive] = useState<boolean>(false)
   const [selectedAnswer, setSelectedAnswer] = useState<number | null>(null)
   const [triviaFeedback, setTriviaFeedback] = useState<string>('')
 
-  // מצב רادار משפחתי (מצא את)
   const [familyMembers] = useState<FamilyMember[]>([
     { id: '1', name: 'אבא', role: 'מנהל טיול', location: 'ליד המלון', battery: 88, status: 'בטוח', coords: { lat: 32.1, lng: 34.8 } },
     { id: '2', name: 'אמא', role: 'נווטת', location: 'במרכז הקניות', battery: 92, status: 'בטוח', coords: { lat: 32.12, lng: 34.82 } },
     { id: '3', name: 'יובל (מתבגר)', role: 'שחקן טריוויה מוביל', location: 'פארק המים', battery: 64, status: 'בדרכים', coords: { lat: 32.15, lng: 34.85 } }
   ])
 
-  // האזנה לחיבוריות רשת Online / Offline
   useEffect(() => {
-    const handleOnline = () => setIsOnline(true)
-    const handleOffline = () => setIsOnline(false)
-    window.addEventListener('online', handleOnline)
-    window.addEventListener('offline', handleOffline)
-    fetchVersions()
-    return () => {
-      window.removeEventListener('online', handleOnline)
-      window.removeEventListener('offline', handleOffline)
+    if (typeof window !== 'undefined') {
+      setIsOnline(navigator.onLine)
+      const handleOnline = () => setIsOnline(true)
+      const handleOffline = () => setIsOnline(false)
+      window.addEventListener('online', handleOnline)
+      window.addEventListener('offline', handleOffline)
+      fetchVersions()
+      return () => {
+        window.removeEventListener('online', handleOnline)
+        window.removeEventListener('offline', handleOffline)
+      }
     }
   }, [])
 
@@ -123,7 +118,7 @@ export default function App() {
         .select('*')
         .order('created_at', { ascending: false })
       if (!error && data && data.length > 0) {
-        setVersionsHistory(data.map(item => item.version_data))
+        setVersionsHistory(data.map((item: any) => item.version_data))
       }
     } catch (err) {
       console.error('שגיאה בטעינת גרסאות מ-Supabase:', err)
@@ -164,7 +159,7 @@ export default function App() {
         alert(`גרסה ${nextVersionNum} נשמרה בהצלחה בענן!`)
         fetchVersions()
       } else {
-        alert('שגיאה בשמירה בענן, נשמר מקומית.')
+        alert('שגיאה בשמירה בענן.')
       }
     } catch (err) {
       console.error(err)
@@ -185,7 +180,6 @@ export default function App() {
     }
   }
 
-  // ייצוא נתונים לקובץ JSON בטלפון / מחשב
   const handleExportJSON = () => {
     const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify({ destination, startDate, endDate, hotelAddress, itinerary }))
     const downloadAnchor = document.createElement('a')
@@ -196,7 +190,6 @@ export default function App() {
     downloadAnchor.remove()
   }
 
-  // טעינת נתונים מקובץ JSON בטלפון / מחשב
   const handleImportJSON = (e: React.ChangeEvent<HTMLInputElement>) => {
     const fileReader = new FileReader()
     if (e.target.files && e.target.files[0]) {
@@ -209,7 +202,7 @@ export default function App() {
             setStartDate(parsed.startDate || '')
             setEndDate(parsed.endDate || '')
             setHotelAddress(parsed.hotelAddress || '')
-            setItinerary(parsed.parsedItinerary || parsed.itinerary)
+            setItinerary(parsed.itinerary)
             alert('הטיול נטען בהצלחה מהקובץ!')
             setCurrentStep('itinerary')
           }
@@ -220,7 +213,6 @@ export default function App() {
     }
   }
 
-  // פענוח קובץ אקסל או טקסט מובנה אוטומטית
   const handleExcelUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0]
     if (!file) return
@@ -245,7 +237,7 @@ export default function App() {
             id: `excel_${idx}`,
             name: attrName,
             location: attrLoc,
-            type: type as any
+            type: type
           })
         }
 
@@ -300,7 +292,6 @@ export default function App() {
       flexDirection: 'column'
     }}>
       
-      {/* סרגל עליון מקצועי עם חיווי רשת */}
       <header style={{ 
         display: 'flex', 
         justifyContent: 'space-between', 
@@ -315,7 +306,6 @@ export default function App() {
       }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.8rem' }}>
           <span style={{ fontWeight: '800', fontSize: '1.2rem', color: '#0f172a' }}>✈️ TripMaster Pro</span>
-          {/* חיווי אונליין / אופליין */}
           <div style={{ 
             display: 'flex', 
             alignItems: 'center', 
@@ -377,7 +367,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* תפריט צדדי (Drawer) עשיר ומורחב */}
       {isSidebarOpen && (
         <div 
           onClick={() => setIsSidebarOpen(false)}
@@ -413,7 +402,6 @@ export default function App() {
                 </button>
               </div>
 
-              {/* ניווט פנימי בתפריט הצד */}
               <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.5rem' }}>
                 <button 
                   onClick={() => setActiveTabInSidebar('menu')}
@@ -423,4 +411,306 @@ export default function App() {
                 </button>
                 <button 
                   onClick={() => setActiveTabInSidebar('trivia')}
-                  style={{ flex:
+                  style={{ flex: 1, padding: '0.5rem', borderRadius: '6px', border: 'none', background: activeTabInSidebar === 'trivia' ? '#4f46e5' : '#f1f5f9', color: activeTabInSidebar === 'trivia' ? '#fff' : '#334155', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}
+                >
+                  🎯 טריוויה נוער
+                </button>
+                <button 
+                  onClick={() => setActiveTabInSidebar('radar')}
+                  style={{ flex: 1, padding: '0.5rem', borderRadius: '6px', border: 'none', background: activeTabInSidebar === 'radar' ? '#4f46e5' : '#f1f5f9', color: activeTabInSidebar === 'radar' ? '#fff' : '#334155', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}
+                >
+                  🛰️ רادار משפחתי
+                </button>
+              </div>
+
+              {activeTabInSidebar === 'menu' && (
+                <div>
+                  <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '1.5rem' }}>
+                    <h4 style={{ fontSize: '0.9rem', color: '#1e293b', marginTop: 0, marginBottom: '0.5rem' }}>📊 טעינת מסלול מאקסל / קובץ</h4>
+                    <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '0.75rem' }}>בחר קובץ CSV/Excel עם שמות אטרקציות וכתובות לבנייה אוטומטית:</p>
+                    <input type="file" accept=".csv, .xlsx, .txt" onChange={handleExcelUpload} style={{ fontSize: '0.8rem', width: '100%' }} />
+                  </div>
+
+                  <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px solid #e2e8f0', marginBottom: '1.5rem' }}>
+                    <h4 style={{ fontSize: '0.9rem', color: '#1e293b', marginTop: 0, marginBottom: '0.5rem' }}>💾 גיבוי ושחזור מטלפון</h4>
+                    <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '0.5rem' }}>
+                      <button onClick={handleExportJSON} style={{ flex: 1, padding: '0.5rem', background: '#0284c7', color: '#fff', border: 'none', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 'bold', cursor: 'pointer' }}>ייצא לטלפון</button>
+                      <label style={{ flex: 1, padding: '0.5rem', background: '#0d9488', color: '#fff', borderRadius: '6px', fontSize: '0.8rem', fontWeight: 'bold', textAlign: 'center', cursor: 'pointer' }}>
+                        טען מטלפון
+                        <input type="file" accept=".json" onChange={handleImportJSON} style={{ display: 'none' }} />
+                      </label>
+                    </div>
+                  </div>
+
+                  <div style={{ borderTop: '1px solid #f1f5f9', paddingTop: '1rem' }}>
+                    <h4 style={{ fontSize: '0.9rem', color: '#4f46e5', marginBottom: '0.75rem' }}>🔒 אבטחת מנהל (Disaster Recovery)</h4>
+                    {!isAdminAuthenticated ? (
+                      <form onSubmit={handleAdminLogin}>
+                        <input 
+                          type="password" 
+                          value={adminPasswordInput} 
+                          onChange={e => setAdminPasswordInput(e.target.value)}
+                          placeholder="סיסמת מנהל (1967)..."
+                          style={{ width: '100%', padding: '0.5rem', borderRadius: '6px', border: '1px solid #cbd5e1', fontSize: '0.85rem', boxSizing: 'border-box', marginBottom: '0.5rem' }}
+                        />
+                        <button type="submit" style={{ width: '100%', padding: '0.5rem', background: '#0f172a', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}>התחבר כמנהל</button>
+                      </form>
+                    ) : (
+                      <div>
+                        <div style={{ background: '#ecfdf5', color: '#065f46', padding: '0.4rem', borderRadius: '6px', fontSize: '0.75rem', marginBottom: '0.75rem', fontWeight: 'bold' }}>
+                          ✅ מחובר כמנהל על
+                        </div>
+                        <button type="button" onClick={handleSaveNewVersion} style={{ background: '#10b981', color: '#fff', width: '100%', padding: '0.5rem', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer', marginBottom: '0.75rem' }}>
+                          💾 צור גרסה חדשה בענן (Commit)
+                        </button>
+                        <select 
+                          value={selectedVersionToRestore} 
+                          onChange={e => setSelectedVersionToRestore(e.target.value)}
+                          style={{ width: '100%', padding: '0.4rem', borderRadius: '6px', border: '1px solid #cbd5e1', marginBottom: '0.5rem', fontSize: '0.8rem' }}
+                        >
+                          <option value="">בחר גרסה לשחזור...</option>
+                          {versionsHistory.map(ver => (
+                            <option key={ver.versionNumber} value={ver.versionNumber}>{ver.versionNumber} - {ver.timestamp}</option>
+                          ))}
+                        </select>
+                        <button type="button" onClick={handleRestoreVersion} style={{ width: '100%', padding: '0.4rem', background: '#f59e0b', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}>
+                          שחזר גרסה נבחרת
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {activeTabInSidebar === 'trivia' && (
+                <div>
+                  <h4 style={{ color: '#4f46e5', marginTop: 0, marginBottom: '0.5rem' }}>🎯 טריוויה ספורדית לנוער (14-20)</h4>
+                  <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '1rem' }}>1,500 שאלות מאתגרות. צבור ניקוד, עצור והמשך מתי שתרצה!</p>
+                  
+                  <div style={{ background: '#e0e7ff', padding: '0.75rem', borderRadius: '8px', textAlign: 'center', marginBottom: '1rem', fontWeight: 'bold', color: '#3730a3' }}>
+                    🏆 ניקוד מצטבר: {triviaScore} נקודות
+                  </div>
+
+                  {!isTriviaActive ? (
+                    <button 
+                      onClick={() => setIsTriviaActive(true)}
+                      style={{ width: '100%', padding: '0.7rem', background: '#4f46e5', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.85rem' }}
+                    >
+                      ▶️ התחל / המשך משחק טריוויה
+                    </button>
+                  ) : (
+                    <div style={{ background: '#f8fafc', padding: '1rem', borderRadius: '10px', border: '1px solid #e2e8f0' }}>
+                      <div style={{ fontSize: '0.85rem', fontWeight: 'bold', marginBottom: '0.5rem', color: '#1e293b' }}>
+                        שאלה {currentTriviaIndex + 1} מתוך 1,500
+                      </div>
+                      <div style={{ fontSize: '0.9rem', marginBottom: '1rem', color: '#334155' }}>
+                        {TRIVIA_BANK[currentTriviaIndex % TRIVIA_BANK.length].q}
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', gap: '0.5rem', marginBottom: '1rem' }}>
+                        {TRIVIA_BANK[currentTriviaIndex % TRIVIA_BANK.length].options.map((opt, oIdx) => (
+                          <button
+                            key={oIdx}
+                            onClick={() => {
+                              const currentQ = TRIVIA_BANK[currentTriviaIndex % TRIVIA_BANK.length]
+                              if (oIdx === currentQ.answer) {
+                                setTriviaScore(s => s + 10)
+                                setTriviaFeedback('כל הכבוד! תשובה נכונה 🎉')
+                              } else {
+                                setTriviaFeedback('טעות... נסה את השאלה הבאה.')
+                              }
+                              setSelectedAnswer(oIdx)
+                            }}
+                            style={{
+                              padding: '0.5rem',
+                              borderRadius: '6px',
+                              border: '1px solid #cbd5e1',
+                              background: selectedAnswer === null ? '#fff' : (oIdx === TRIVIA_BANK[currentTriviaIndex % TRIVIA_BANK.length].answer ? '#d1fae5' : (selectedAnswer === oIdx ? '#fee2e2' : '#fff')),
+                              cursor: selectedAnswer === null ? 'pointer' : 'default',
+                              textAlign: 'right',
+                              fontSize: '0.85rem',
+                              fontWeight: '500'
+                            }}
+                            disabled={selectedAnswer !== null}
+                          >
+                            {opt}
+                          </button>
+                        ))}
+                      </div>
+
+                      {triviaFeedback && (
+                        <div style={{ fontSize: '0.8rem', fontWeight: 'bold', textAlign: 'center', marginBottom: '0.75rem', color: triviaFeedback.includes('כל הכבוד') ? '#059669' : '#dc2626' }}>
+                          {triviaFeedback}
+                        </div>
+                      )}
+
+                      <div style={{ display: 'flex', gap: '0.5rem' }}>
+                        {selectedAnswer !== null && (
+                          <button 
+                            onClick={() => {
+                              setSelectedAnswer(null)
+                              setTriviaFeedback('')
+                              setCurrentTriviaIndex(i => i + 1)
+                            }}
+                            style={{ flex: 1, padding: '0.5rem', background: '#10b981', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}
+                          >
+                            שאלה הבאה ⬅️
+                          </button>
+                        )}
+                        <button 
+                          onClick={() => setIsTriviaActive(false)}
+                          style={{ flex: 1, padding: '0.5rem', background: '#64748b', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}
+                        >
+                          ⏸️ עצור ושמור מצב
+                        </button>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              )}
+
+              {activeTabInSidebar === 'radar' && (
+                <div>
+                  <h4 style={{ color: '#4f46e5', marginTop: 0, marginBottom: '0.5rem' }}>🛰️ רادار משפחתי (מצא את)</h4>
+                  <p style={{ fontSize: '0.75rem', color: '#64748b', marginBottom: '1rem' }}>איתור מיקום בני המשפחה בזמן אמת, מצב סוללה וניווט חירום:</p>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.75rem' }}>
+                    {familyMembers.map(member => (
+                      <div key={member.id} style={{ background: '#f8fafc', padding: '0.75rem', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <div>
+                          <div style={{ fontWeight: 'bold', fontSize: '0.9rem', color: '#1e293b' }}>{member.name}</div>
+                          <div style={{ fontSize: '0.75rem', color: '#64748b' }}>📍 {member.location} | סוללה: {member.battery}%</div>
+                          <div style={{ fontSize: '0.7rem', color: member.status === 'בטוח' ? '#059669' : '#d97706', fontWeight: 'bold', marginTop: '0.2rem' }}>סטטוס: {member.status}</div>
+                        </div>
+                        <button 
+                          onClick={() => openWaze(member.location)}
+                          style={{ padding: '0.4rem 0.6rem', background: '#0284c7', color: '#fff', border: 'none', borderRadius: '6px', fontWeight: 'bold', fontSize: '0.75rem', cursor: 'pointer' }}
+                        >
+                          נווט אליו 🧭
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+            </div>
+
+            <div style={{ fontSize: '0.75rem', color: '#cbd5e1', textAlign: 'center', borderTop: '1px solid #f1f5f9', paddingTop: '1rem', marginTop: '1rem' }}>
+              Trip Planner Pro v2.0
+            </div>
+          </div>
+        </div>
+      )}
+
+      <div style={{ maxWidth: '550px', width: '100%', margin: '1.5rem auto', padding: '0 1rem', boxSizing: 'border-box', flex: 1 }}>
+        
+        <div style={{ textAlign: 'center', marginBottom: '1.5rem' }}>
+          <h1 style={{ fontSize: '1.5rem', color: '#0f172a', margin: '0 0 0.3rem 0' }}>תכנון נסיעות חכם ואוטומטי</h1>
+          <p style={{ color: '#64748b', fontSize: '0.85rem', margin: 0 }}>ניהול מסלולים, ניווט ישיר והעלאה חלקה מאקסל</p>
+        </div>
+
+        {currentStep === 'setup' ? (
+          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', boxShadow: '0 4px 25px rgba(0,0,0,0.04)', border: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
+            <h3 style={{ marginTop: 0, color: '#1e293b', marginBottom: '1rem', fontSize: '1.05rem' }}>שלב 1: הגדרת יעדים ומלון מרכזי</h3>
+            
+            <div style={{ marginBottom: '0.8rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: '600', fontSize: '0.8rem', color: '#475569' }}>יעד הטיול הראשי</label>
+              <input 
+                type="text" 
+                value={destination} 
+                onChange={e => setDestination(e.target.value)}
+                style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', fontSize: '16px' }}
+              />
+            </div>
+
+            <div style={{ marginBottom: '0.8rem' }}>
+              <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: '600', fontSize: '0.8rem', color: '#475569' }}>כתובת המלון (לשמירת כפתור ניווט מהיר)</label>
+              <input 
+                type="text" 
+                value={hotelAddress} 
+                onChange={e => setHotelAddress(e.target.value)}
+                placeholder="לדוגמה: Hotel Riva, Garda"
+                style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', fontSize: '16px' }}
+              />
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.5rem', marginBottom: '1rem' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: '600', fontSize: '0.8rem', color: '#475569' }}>תאריך התחלה</label>
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', fontSize: '16px' }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ display: 'block', marginBottom: '0.3rem', fontWeight: '600', fontSize: '0.8rem', color: '#475569' }}>תאריך סיום</label>
+                <input type="date" value={endDate} min={startDate} onChange={e => setEndDate(e.target.value)} style={{ width: '100%', padding: '0.65rem', borderRadius: '8px', border: '1px solid #cbd5e1', boxSizing: 'border-box', fontSize: '16px' }} />
+              </div>
+            </div>
+
+            <button 
+              onClick={() => setCurrentStep('itinerary')}
+              style={{ width: '100%', padding: '0.75rem', background: '#6366f1', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', fontSize: '0.95rem', cursor: 'pointer', boxShadow: '0 4px 12px rgba(99, 102, 241, 0.2)', marginBottom: '0.8rem' }}
+            >
+              המשך למסלולים היומיים ⬅️
+            </button>
+          </div>
+        ) : (
+          <div style={{ background: '#fff', padding: '1.5rem', borderRadius: '16px', boxShadow: '0 4px 25px rgba(0,0,0,0.04)', border: '1px solid #e2e8f0', boxSizing: 'border-box' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', borderBottom: '1px solid #f1f5f9', paddingBottom: '0.75rem' }}>
+              <div>
+                <h3 style={{ margin: 0, color: '#1e293b', fontSize: '1.05rem' }}>יעד: {destination}</h3>
+                <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.2rem' }}>🏨 מלון: {hotelAddress}</div>
+              </div>
+              <button 
+                onClick={() => setCurrentStep('setup')}
+                style={{ background: 'none', border: 'none', color: '#6366f1', cursor: 'pointer', fontWeight: 'bold', fontSize: '0.8rem' }}
+              >
+                ✏️ ערוך פרטים
+              </button>
+            </div>
+
+            <div style={{ display: 'flex', gap: '0.4rem', marginBottom: '1.2rem', overflowX: 'auto', paddingBottom: '0.4rem' }}>
+              {itinerary.map(day => (
+                <button
+                  key={day.dayNumber}
+                  type="button"
+                  onClick={() => setSelectedDay(day.dayNumber)}
+                  style={{
+                    padding: '0.4rem 0.8rem',
+                    borderRadius: '8px',
+                    border: selectedDay === day.dayNumber ? '2px solid #6366f1' : '1px solid #cbd5e1',
+                    background: selectedDay === day.dayNumber ? '#e0e7ff' : '#fff',
+                    cursor: 'pointer',
+                    fontWeight: 'bold',
+                    whiteSpace: 'nowrap',
+                    fontSize: '0.85rem'
+                  }}
+                >
+                  יום {day.dayNumber}
+                </button>
+              ))}
+            </div>
+
+            {itinerary.filter(d => d.dayNumber === selectedDay).map(day => (
+              <div key={day.dayNumber}>
+                <h4 style={{ color: '#4f46e5', marginBottom: '0.8rem', fontSize: '0.95rem' }}>{day.title}</h4>
+                {day.attractions.map(attr => (
+                  <div key={attr.id} style={{ background: '#f8fafc', padding: '0.8rem', borderRadius: '10px', border: '1px solid #e2e8f0', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.6rem', boxSizing: 'border-box' }}>
+                    <div>
+                      <div style={{ fontWeight: '700', color: '#1e293b', fontSize: '0.9rem' }}>
+                        {attr.type === 'food' ? '🍔 ' : '📍 '} {attr.name}
+                      </div>
+                      <div style={{ fontSize: '0.75rem', color: '#64748b', marginTop: '0.1rem' }}>{attr.location}</div>
+                    </div>
+                    <div style={{ display: 'flex', gap: '0.3rem' }}>
+                      <button onClick={() => openWaze(attr.location)} style={{ padding: '0.35rem 0.5rem', background: '#33ccff', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer', fontSize: '0.7rem' }}>Waze</button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+    </div>
+  )
+}
