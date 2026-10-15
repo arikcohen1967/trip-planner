@@ -1,20 +1,7 @@
-import React, { useState, useEffect, useRef } from 'react'
+import React, { useState, useEffect } from 'react'
 
 const APP_VERSION_LABEL = 'v3.3 Pro Find My'
 const ADMIN_PASSWORD = '1967'
-
-interface Attraction {
-  id: string
-  name: string
-  location: string
-  type: 'attraction' | 'food' | 'hotel'
-}
-
-interface DayItinerary {
-  dayNumber: number
-  title: string
-  attractions: Attraction[]
-}
 
 interface FamilyMember {
   id: string
@@ -38,11 +25,9 @@ const INITIAL_FAMILY: FamilyMember[] = [
 ]
 
 export default function App() {
-  const [currentStep, setCurrentStep] = useState<'setup' | 'itinerary'>('setup')
   const [isOnline, setIsOnline] = useState<boolean>(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
   
-  // ניהול משתמש נוכחי (Login)
   const [currentUser, setCurrentUser] = useState<FamilyMember | null>(null)
   const [loginModalOpen, setLoginModalOpen] = useState<boolean>(true)
   const [selectedUserId, setSelectedUserId] = useState<string>('arik')
@@ -52,33 +37,16 @@ export default function App() {
   const [adminPasswordInput, setAdminPasswordInput] = useState<string>('')
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false)
 
-  const [destination, setDestination] = useState<string>('צפון אגם גארדה, איטליה')
-  const [hotelAddress, setHotelAddress] = useState<string>('Hotel Riva, Garda, Italy')
-  
-  const [itinerary, setItinerary] = useState<DayItinerary[]>([
-    {
-      dayNumber: 1,
-      title: 'הגעה וסיור היכרות באגם',
-      attractions: [
-        { id: '101', name: 'מרכז העיר העתיקה', location: 'Riva del Garda, Italy', type: 'attraction' },
-        { id: '102', name: 'מסעדת פיצה מומלצת', location: 'Piazza 3 Novembre, Riva del Garda', type: 'food' }
-      ]
-    }
-  ])
-  const [selectedDay, setSelectedDay] = useState<number>(1)
   const [activeTabInSidebar, setActiveTabInSidebar] = useState<'menu' | 'trivia' | 'radar'>('radar')
-
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>(INITIAL_FAMILY)
   const [selectedMember, setSelectedMember] = useState<FamilyMember | null>(null)
 
-  // מעקב GPS חי למכשיר המקומי
   useEffect(() => {
     if (typeof window !== 'undefined') {
       setIsOnline(navigator.onLine)
       window.addEventListener('online', () => setIsOnline(true))
       window.addEventListener('offline', () => setIsOnline(false))
 
-      // מעקב מיקום אמיתי ב-GPS של המכשיר
       if (navigator.geolocation && currentUser) {
         const watchId = navigator.geolocation.watchPosition(
           (position) => {
@@ -93,7 +61,6 @@ export default function App() {
     }
   }, [currentUser])
 
-  // פונקציית התחברות למערכת
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault()
     let user = familyMembers.find(m => m.id === selectedUserId)
@@ -120,22 +87,20 @@ export default function App() {
     }
   }
 
-  // שליחת פינג קולי (Sound Ping Alert)
   const sendSoundPing = (member: FamilyMember) => {
-    // השמעת צליל התראה במכשיר וסימולציית הודעת פוש
     try {
       const ctx = new (window.AudioContext || (window as any).webkitAudioContext)()
       const osc = ctx.createOscillator()
       const gain = ctx.createGain()
       osc.type = 'sine'
-      osc.frequency.setValueAtTime(880, ctx.currentTime) // תדר גבוה לצפצוף איתור
+      osc.frequency.setValueAtTime(880, ctx.currentTime)
       osc.connect(gain)
       gain.connect(ctx.destination)
       osc.start()
       setTimeout(() => { osc.stop(); }, 800)
     } catch(e) { console.log(e) }
     
-    alert(`📢 נשלח פינג קולי בהצלחה אל ${member.name}! המכשיר שלו אמור להשמיע התראה כעת.`)
+    alert(`📢 נשלח פינג קולי בהצלחה אל ${member.name}!`)
   }
 
   const openWaze = (loc: string) => window.open(`https://www.waze.com/ul?q=${encodeURIComponent(loc)}&navigate=yes`, '_blank')
@@ -144,13 +109,12 @@ export default function App() {
   return (
     <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', overflowY: 'auto', direction: 'rtl', background: '#000', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', color: '#fff' }}>
       
-      {/* מסך התחברות (Login Modal) */}
       {loginModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div style={{ background: '#1c1c1e', width: '100%', maxWidth: '400px', borderRadius: '20px', padding: '2rem', border: '1px solid #3a3a3c', textAlign: 'center' }}>
             <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📍</div>
             <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.4rem' }}>Find My Family - התחברות</h2>
-            <p style={{ fontSize: '0.85rem', color: '#8e8e93', marginBottom: '1.5rem' }}>בחר את שמך או הוסף משתמש חדש כדי להתחבר לשירותי המיקום החיים.</p>
+            <p style={{ fontSize: '0.85rem', color: '#8e8e93', marginBottom: '1.5rem' }}>בחר את שמך או הוסף משתמש חדש לשיתוף מיקום חי.</p>
             
             <form onSubmit={handleLogin}>
               <select value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', background: '#2c2c2e', color: '#fff', border: '1px solid #3a3a3c', fontSize: '1rem', marginBottom: '1rem' }}>
@@ -170,7 +134,6 @@ export default function App() {
         </div>
       )}
 
-      {/* סרגל עליון בסגנון iOS */}
       <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', background: 'rgba(28,28,30,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #3a3a3c', position: 'sticky', top: 0, zIndex: 50, boxSizing: 'border-box' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <span style={{ fontWeight: '700', fontSize: '1rem', color: '#fff' }}>Find My ({currentUser?.name || 'אורח'})</span>
@@ -183,7 +146,6 @@ export default function App() {
         </div>
       </header>
 
-      {/* אזור המפה החיה ברקע (מוטמע דרך OpenStreetMap / Leaflet פתוח ואמיתי) */}
       <div style={{ flex: 1, position: 'relative', width: '100%', height: '100%', minHeight: '400px', background: '#1c1c1e' }}>
         <iframe 
           title="Live Map"
@@ -194,10 +156,9 @@ export default function App() {
           src={`https://www.openstreetmap.org/export/embed.html?bbox=${currentUser?.lng ? currentUser.lng - 0.05 : 34.85}%2C${currentUser?.lat ? currentUser.lat - 0.05 : 32.1}%2C${currentUser?.lng ? currentUser.lng + 0.05 : 34.95}%2C${currentUser?.lat ? currentUser.lat + 0.05 : 32.2}&layer=mapnik&marker=${currentUser?.lat || 32.1093}%2C${currentUser?.lng || 34.8555}`}>
         </iframe>
 
-        {/* פאנל צף תחתון בסגנון iOS Find My */}
         <div style={{ position: 'absolute', bottom: '20px', left: '15px', right: '15px', background: 'rgba(28,28,30,0.95)', backdropFilter: 'blur(25px)', borderRadius: '20px', padding: '1rem', border: '1px solid rgba(255,255,255,0.15)', zIndex: 10, boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
-            <div style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>אנשים מחוברים (${familyMembers.length})</div>
+            <div style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>אנשים מחוברים ({familyMembers.length})</div>
             <button onClick={() => setLoginModalOpen(true)} style={{ background: 'none', border: 'none', color: '#0a84ff', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 'bold' }}>החלף משתמש 🔄</button>
           </div>
 
@@ -213,7 +174,6 @@ export default function App() {
         </div>
       </div>
 
-      {/* מודל פרטי משתמש שנבחר (כרטיסיית Find My אישית) */}
       {selectedMember && (
         <div onClick={() => setSelectedMember(null)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.6)', zIndex: 1100, display: 'flex', alignItems: 'flex-end', justifyContent: 'center' }}>
           <div onClick={e => e.stopPropagation()} style={{ background: '#1c1c1e', width: '100%', maxWidth: '500px', borderTopLeftRadius: '24px', borderTopRightRadius: '24px', padding: '1.5rem', border: '1px solid #3a3a3c', boxSizing: 'border-box' }}>
@@ -222,4 +182,67 @@ export default function App() {
               <div>
                 <h3 style={{ margin: 0, fontSize: '1.2rem' }}>{selectedMember.name}</h3>
                 <div style={{ fontSize: '0.8rem', color: '#8e8e93' }}>{selectedMember.subtitle} • {selectedMember.address}</div>
-                <div style={{ fontSize: '0.75rem', color: '#32d74b', marginTop: '2px' }}>סט
+                <div style={{ fontSize: '0.75rem', color: '#32d74b', marginTop: '2px' }}>סטטוס: {selectedMember.status} | סוללה: {selectedMember.battery}% 🔋</div>
+              </div>
+            </div>
+
+            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginBottom: '1rem' }}>
+              <button onClick={() => openGoogleMaps(selectedMember.lat, selectedMember.lng)} style={{ padding: '0.7rem', background: '#007aff', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}>🧭 נווט (Maps)</button>
+              <button onClick={() => openWaze(selectedMember.address)} style={{ padding: '0.7rem', background: '#33ccff', color: '#000', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}>🚗 Waze</button>
+              <button onClick={() => sendSoundPing(selectedMember)} style={{ padding: '0.7rem', background: '#ff9f0a', color: '#000', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}>🔔 פינג קולי</button>
+            </div>
+
+            <button onClick={() => setSelectedMember(null)} style={{ width: '100%', padding: '0.6rem', background: '#2c2c2e', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>סגור</button>
+          </div>
+        </div>
+      )}
+
+      {isSidebarOpen && (
+        <div onClick={() => setIsSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 999 }}>
+          <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: 0, right: 0, width: '360px', height: '100vh', background: '#1c1c1e', zIndex: 1000, padding: '1.5rem', boxSizing: 'border-box', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderLeft: '1px solid #3a3a3c' }}>
+            <div>
+              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.2rem', borderBottom: '1px solid #3a3a3c', paddingBottom: '0.75rem' }}>
+                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>תפריט מערכת</h3>
+                <button onClick={() => setIsSidebarOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>✕</button>
+              </div>
+
+              {activeTabInSidebar === 'radar' && (
+                <div>
+                  <h4 style={{ color: '#0a84ff', marginTop: 0 }}>🛰️ רשימת משתמשים מלאה</h4>
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
+                    {familyMembers.map(m => (
+                      <div key={m.id} onClick={() => { setSelectedMember(m); setIsSidebarOpen(false); }} style={{ background: '#2c2c2e', padding: '0.75rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
+                        <img src={m.avatar} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                        <div style={{ flex: 1 }}>
+                          <div style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>{m.name}</div>
+                          <div style={{ fontSize: '0.7rem', color: '#8e8e93' }}>{m.address} • {m.lastUpdated}</div>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+            <div style={{ fontSize: '0.7rem', color: '#8e8e93', textAlign: 'center', borderTop: '1px solid #3a3a3c', paddingTop: '0.75rem' }}>TripMaster {APP_VERSION_LABEL}</div>
+          </div>
+        </div>
+      )}
+
+      {isVersionModalOpen && (
+        <div onClick={() => setIsVersionModalOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 1100, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
+          <div onClick={e => e.stopPropagation()} style={{ background: '#1c1c1e', width: '100%', maxWidth: '400px', borderRadius: '16px', padding: '1.5rem', border: '1px solid #3a3a3c' }}>
+            <h3 style={{ margin: '0 0 1rem 0', fontSize: '1rem' }}>ניהול גרסאות (1967)</h3>
+            {!isAdminAuthenticated ? (
+              <form onSubmit={e => { e.preventDefault(); if (adminPasswordInput === ADMIN_PASSWORD) setIsAdminAuthenticated(true); else alert('שגוי'); }}>
+                <input type="password" value={adminPasswordInput} onChange={e => setAdminPasswordInput(e.target.value)} placeholder="סיסמה..." style={{ width: '100%', padding: '0.6rem', borderRadius: '8px', background: '#2c2c2e', color: '#fff', border: '1px solid #3a3a3c', marginBottom: '0.75rem', boxSizing: 'border-box' }} />
+                <button type="submit" style={{ width: '100%', padding: '0.6rem', background: '#0a84ff', color: '#fff', border: 'none', borderRadius: '8px', fontWeight: 'bold', cursor: 'pointer' }}>אישור</button>
+              </form>
+            ) : (
+              <div style={{ color: '#32d74b', fontWeight: 'bold', fontSize: '0.85rem' }}>✅ מנהל מערכת מורשה</div>
+            )}
+          </div>
+        </div>
+      )}
+    </div>
+  )
+}
