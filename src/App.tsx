@@ -10,7 +10,7 @@ interface FamilyMember {
   lat: number
   lng: number
   battery: number
-  status: 'בטוח' | 'בדרכים' | 'חירום'
+  status: string
   address: string
   avatar: string
   lastUpdated: string
@@ -27,16 +27,13 @@ const INITIAL_FAMILY: FamilyMember[] = [
 export default function App() {
   const [isOnline, setIsOnline] = useState<boolean>(true)
   const [isSidebarOpen, setIsSidebarOpen] = useState<boolean>(false)
-  
   const [currentUser, setCurrentUser] = useState<FamilyMember | null>(null)
   const [loginModalOpen, setLoginModalOpen] = useState<boolean>(true)
   const [selectedUserId, setSelectedUserId] = useState<string>('arik')
   const [customUserName, setCustomUserName] = useState<string>('')
-
   const [isVersionModalOpen, setIsVersionModalOpen] = useState<boolean>(false)
   const [adminPasswordInput, setAdminPasswordInput] = useState<string>('')
   const [isAdminAuthenticated, setIsAdminAuthenticated] = useState<boolean>(false)
-
   const [activeTabInSidebar, setActiveTabInSidebar] = useState<'menu' | 'trivia' | 'radar'>('radar')
   const [familyMembers, setFamilyMembers] = useState<FamilyMember[]>(INITIAL_FAMILY)
   const [selectedMember, setSelectedMember] = useState<FamilyMember | null>(null)
@@ -83,7 +80,6 @@ export default function App() {
     if (user) {
       setCurrentUser(user)
       setLoginModalOpen(false)
-      alert(`ברוך הבא למערכת Find My, ${user.name}! המיקום שלך משודר כעת.`)
     }
   }
 
@@ -99,23 +95,20 @@ export default function App() {
       osc.start()
       setTimeout(() => { osc.stop(); }, 800)
     } catch(e) { console.log(e) }
-    
-    alert(`📢 נשלח פינג קולי בהצלחה אל ${member.name}!`)
+    alert(`נשלח פינג קולי אל ${member.name}!`)
   }
 
   const openWaze = (loc: string) => window.open(`https://www.waze.com/ul?q=${encodeURIComponent(loc)}&navigate=yes`, '_blank')
   const openGoogleMaps = (lat: number, lng: number) => window.open(`https://www.google.com/maps/search/?api=1&query=${lat},${lng}`, '_blank')
 
   return (
-    <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', overflowY: 'auto', direction: 'rtl', background: '#000', fontFamily: '-apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', color: '#fff' }}>
+    <div style={{ position: 'fixed', inset: 0, width: '100vw', height: '100vh', overflowY: 'auto', direction: 'rtl', background: '#000', fontFamily: 'sans-serif', boxSizing: 'border-box', display: 'flex', flexDirection: 'column', color: '#fff' }}>
       
       {loginModalOpen && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', zIndex: 2000, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '1rem' }}>
           <div style={{ background: '#1c1c1e', width: '100%', maxWidth: '400px', borderRadius: '20px', padding: '2rem', border: '1px solid #3a3a3c', textAlign: 'center' }}>
             <div style={{ fontSize: '2.5rem', marginBottom: '0.5rem' }}>📍</div>
             <h2 style={{ margin: '0 0 0.5rem 0', fontSize: '1.4rem' }}>Find My Family - התחברות</h2>
-            <p style={{ fontSize: '0.85rem', color: '#8e8e93', marginBottom: '1.5rem' }}>בחר את שמך או הוסף משתמש חדש לשיתוף מיקום חי.</p>
-            
             <form onSubmit={handleLogin}>
               <select value={selectedUserId} onChange={e => setSelectedUserId(e.target.value)} style={{ width: '100%', padding: '0.75rem', borderRadius: '10px', background: '#2c2c2e', color: '#fff', border: '1px solid #3a3a3c', fontSize: '1rem', marginBottom: '1rem' }}>
                 {familyMembers.map(m => (
@@ -134,15 +127,13 @@ export default function App() {
         </div>
       )}
 
-      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', background: 'rgba(28,28,30,0.9)', backdropFilter: 'blur(20px)', borderBottom: '1px solid #3a3a3c', position: 'sticky', top: 0, zIndex: 50, boxSizing: 'border-box' }}>
+      <header style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', padding: '0.75rem 1.25rem', background: '#1c1c1e', borderBottom: '1px solid #3a3a3c', position: 'sticky', top: 0, zIndex: 50, boxSizing: 'border-box' }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: '0.6rem' }}>
           <span style={{ fontWeight: '700', fontSize: '1rem', color: '#fff' }}>Find My ({currentUser?.name || 'אורח'})</span>
           <button onClick={() => setIsVersionModalOpen(true)} style={{ height: '32px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', borderRadius: '8px', padding: '0 0.6rem', cursor: 'pointer', fontSize: '0.75rem', fontWeight: 'bold', color: '#0a84ff' }}>{APP_VERSION_LABEL}</button>
         </div>
-        
         <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center' }}>
           <button onClick={() => { setActiveTabInSidebar('radar'); setIsSidebarOpen(true); }} style={{ height: '36px', background: '#007aff', border: 'none', borderRadius: '18px', padding: '0 1rem', cursor: 'pointer', fontSize: '0.8rem', fontWeight: 'bold', color: '#fff' }}>🛰️ רשימת אנשים</button>
-          <button onClick={() => { setActiveTabInSidebar('menu'); setIsSidebarOpen(true); }} style={{ height: '36px', width: '36px', background: '#2c2c2e', border: '1px solid #3a3a3c', borderRadius: '50%', cursor: 'pointer', fontSize: '1.1rem', color: '#fff' }}>⋮</button>
         </div>
       </header>
 
@@ -156,17 +147,15 @@ export default function App() {
           src={`https://www.openstreetmap.org/export/embed.html?bbox=${currentUser?.lng ? currentUser.lng - 0.05 : 34.85}%2C${currentUser?.lat ? currentUser.lat - 0.05 : 32.1}%2C${currentUser?.lng ? currentUser.lng + 0.05 : 34.95}%2C${currentUser?.lat ? currentUser.lat + 0.05 : 32.2}&layer=mapnik&marker=${currentUser?.lat || 32.1093}%2C${currentUser?.lng || 34.8555}`}>
         </iframe>
 
-        <div style={{ position: 'absolute', bottom: '20px', left: '15px', right: '15px', background: 'rgba(28,28,30,0.95)', backdropFilter: 'blur(25px)', borderRadius: '20px', padding: '1rem', border: '1px solid rgba(255,255,255,0.15)', zIndex: 10, boxShadow: '0 10px 30px rgba(0,0,0,0.5)' }}>
+        <div style={{ position: 'absolute', bottom: '20px', left: '15px', right: '15px', background: 'rgba(28,28,30,0.95)', borderRadius: '20px', padding: '1rem', border: '1px solid rgba(255,255,255,0.15)', zIndex: 10 }}>
           <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '0.75rem' }}>
             <div style={{ fontSize: '1.1rem', fontWeight: 'bold' }}>אנשים מחוברים ({familyMembers.length})</div>
-            <button onClick={() => setLoginModalOpen(true)} style={{ background: 'none', border: 'none', color: '#0a84ff', fontSize: '0.8rem', cursor: 'pointer', fontWeight: 'bold' }}>החלף משתמש 🔄</button>
           </div>
-
           <div style={{ display: 'flex', gap: '10px', overflowX: 'auto', paddingBottom: '5px' }}>
             {familyMembers.map(m => (
-              <div key={m.id} onClick={() => setSelectedMember(m)} style={{ minWidth: '90px', background: selectedMember?.id === m.id ? '#3a3a3c' : '#2c2c2e', borderRadius: '14px', padding: '0.6rem', textAlign: 'center', cursor: 'pointer', border: selectedMember?.id === m.id ? '1px solid #0a84ff' : '1px solid transparent' }}>
+              <div key={m.id} onClick={() => setSelectedMember(m)} style={{ minWidth: '90px', background: selectedMember?.id === m.id ? '#3a3a3c' : '#2c2c2e', borderRadius: '14px', padding: '0.6rem', textAlign: 'center', cursor: 'pointer' }}>
                 <img src={m.avatar} alt="" style={{ width: '42px', height: '42px', borderRadius: '50%', objectFit: 'cover', marginBottom: '4px' }} />
-                <div style={{ fontSize: '0.75rem', fontWeight: 'bold', whiteSpace: 'nowrap', overflow: 'hidden', textOverflow: 'ellipsis' }}>{m.name.split(' ')[0]}</div>
+                <div style={{ fontSize: '0.75rem', fontWeight: 'bold', whiteSpace: 'nowrap' }}>{m.name.split(' ')[0]}</div>
                 <div style={{ fontSize: '0.65rem', color: '#32d74b' }}>{m.battery}% 🔋</div>
               </div>
             ))}
@@ -187,9 +176,9 @@ export default function App() {
             </div>
 
             <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '0.5rem', marginBottom: '1rem' }}>
-              <button onClick={() => openGoogleMaps(selectedMember.lat, selectedMember.lng)} style={{ padding: '0.7rem', background: '#007aff', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}>🧭 נווט (Maps)</button>
+              <button onClick={() => openGoogleMaps(selectedMember.lat, selectedMember.lng)} style={{ padding: '0.7rem', background: '#007aff', color: '#fff', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}>🧭 נווט</button>
               <button onClick={() => openWaze(selectedMember.address)} style={{ padding: '0.7rem', background: '#33ccff', color: '#000', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}>🚗 Waze</button>
-              <button onClick={() => sendSoundPing(selectedMember)} style={{ padding: '0.7rem', background: '#ff9f0a', color: '#000', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}>🔔 פינג קולי</button>
+              <button onClick={() => sendSoundPing(selectedMember)} style={{ padding: '0.7rem', background: '#ff9f0a', color: '#000', border: 'none', borderRadius: '12px', fontWeight: 'bold', fontSize: '0.8rem', cursor: 'pointer' }}>🔔 פינג</button>
             </div>
 
             <button onClick={() => setSelectedMember(null)} style={{ width: '100%', padding: '0.6rem', background: '#2c2c2e', color: '#fff', border: 'none', borderRadius: '10px', cursor: 'pointer' }}>סגור</button>
@@ -199,31 +188,23 @@ export default function App() {
 
       {isSidebarOpen && (
         <div onClick={() => setIsSidebarOpen(false)} style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)', zIndex: 999 }}>
-          <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: 0, right: 0, width: '360px', height: '100vh', background: '#1c1c1e', zIndex: 1000, padding: '1.5rem', boxSizing: 'border-box', overflowY: 'auto', display: 'flex', flexDirection: 'column', justifyContent: 'space-between', borderLeft: '1px solid #3a3a3c' }}>
+          <div onClick={e => e.stopPropagation()} style={{ position: 'fixed', top: 0, right: 0, width: '360px', height: '100vh', background: '#1c1c1e', zIndex: 1000, padding: '1.5rem', boxSizing: 'border-box', overflowY: 'auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.2rem', borderBottom: '1px solid #3a3a3c', paddingBottom: '0.75rem' }}>
+              <h3 style={{ margin: 0, fontSize: '1.1rem' }}>תפריט מערכת</h3>
+              <button onClick={() => setIsSidebarOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>✕</button>
+            </div>
             <div>
-              <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '1.2rem', borderBottom: '1px solid #3a3a3c', paddingBottom: '0.75rem' }}>
-                <h3 style={{ margin: 0, fontSize: '1.1rem' }}>תפריט מערכת</h3>
-                <button onClick={() => setIsSidebarOpen(false)} style={{ background: 'none', border: 'none', color: '#fff', cursor: 'pointer' }}>✕</button>
-              </div>
-
-              {activeTabInSidebar === 'radar' && (
-                <div>
-                  <h4 style={{ color: '#0a84ff', marginTop: 0 }}>🛰️ רשימת משתמשים מלאה</h4>
-                  <div style={{ display: 'flex', flexDirection: 'column', gap: '0.6rem' }}>
-                    {familyMembers.map(m => (
-                      <div key={m.id} onClick={() => { setSelectedMember(m); setIsSidebarOpen(false); }} style={{ background: '#2c2c2e', padding: '0.75rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer' }}>
-                        <img src={m.avatar} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
-                        <div style={{ flex: 1 }}>
-                          <div style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>{m.name}</div>
-                          <div style={{ fontSize: '0.7rem', color: '#8e8e93' }}>{m.address} • {m.lastUpdated}</div>
-                        </div>
-                      </div>
-                    ))}
+              <h4 style={{ color: '#0a84ff', marginTop: 0 }}>🛰️ רשימת משתמשים מלאה</h4>
+              {familyMembers.map(m => (
+                <div key={m.id} onClick={() => { setSelectedMember(m); setIsSidebarOpen(false); }} style={{ background: '#2c2c2e', padding: '0.75rem', borderRadius: '12px', display: 'flex', alignItems: 'center', gap: '0.75rem', cursor: 'pointer', marginBottom: '8px' }}>
+                  <img src={m.avatar} alt="" style={{ width: '40px', height: '40px', borderRadius: '50%', objectFit: 'cover' }} />
+                  <div style={{ flex: 1 }}>
+                    <div style={{ fontWeight: 'bold', fontSize: '0.85rem' }}>{m.name}</div>
+                    <div style={{ fontSize: '0.7rem', color: '#8e8e93' }}>{m.address} • {m.lastUpdated}</div>
                   </div>
                 </div>
-              )}
+              ))}
             </div>
-            <div style={{ fontSize: '0.7rem', color: '#8e8e93', textAlign: 'center', borderTop: '1px solid #3a3a3c', paddingTop: '0.75rem' }}>TripMaster {APP_VERSION_LABEL}</div>
           </div>
         </div>
       )}
